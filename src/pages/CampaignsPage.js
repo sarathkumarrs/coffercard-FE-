@@ -236,9 +236,17 @@ const CampaignsPage = () => {
             {isCreateModalOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
-                        <div className="p-6 border-b">
-                            <h2 className="text-xl font-bold">Create New Campaign</h2>
+                       <div className="flex justify-between items-center p-6 border-b">
+                        <h2 className="text-xl font-bold">Create New Campaign</h2>
+                        <button
+                            onClick={() => setIsCreateModalOpen(false)}
+                            className="text-gray-500 hover:text-gray-700 text-2xl font-bold leading-none"
+                            aria-label="Close modal"
+                        >
+                            ×
+                        </button>
                         </div>
+
                         <div className="p-6 overflow-y-auto flex-1">
                             <form onSubmit={handleCreateCampaign}>
                                 <div className="mb-4">
