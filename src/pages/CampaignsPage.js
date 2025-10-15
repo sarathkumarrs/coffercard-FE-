@@ -332,7 +332,7 @@ const CampaignsPage = () => {
                                             <input
                                                 type="url"
                                                 value={newCampaign.facebook_link}
-                                                onChange={e => setNewCampaign({...newCampaignata, facebook_link: e.target.value})}
+                                                onChange={e => setNewCampaign({...newCampaign, facebook_link: e.target.value})}
                                                 className="w-full p-2 border rounded"
                                                 placeholder="https://facebook.com/..."
                                             />

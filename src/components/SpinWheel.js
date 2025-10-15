@@ -135,7 +135,7 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign }) => {
             window.open(`https://twitter.com/intent/tweet?text=Check%20out%20this%20prize%20wheel!&url=${encodeURIComponent(window.location.href)}`);
             
             // Record share anyway
-            await fetch(`http://192.168.1.5:8000/api/public/campaign/${campaignCode}/share/`, {
+            await fetch(`${BASE_URL}/api/public/campaign/${campaignCode}/share/`, {
                 method: 'POST'
             });
         }

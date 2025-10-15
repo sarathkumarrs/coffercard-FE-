@@ -132,7 +132,7 @@ const PublicCampaignPage = () => {
             const data = await response.json();
 
             if (data.needs_registration) {
-                setShowRegistration(true);
+                setNeedsRegistration(true);
                 return;
             }
 
@@ -164,13 +164,13 @@ const PublicCampaignPage = () => {
                         {campaign.name}
                     </h1>
                     <p className="text-gray-600">
-                        {campaign.type === 'spin' 
+                        {campaign.campaign_type === 'spin'
                             ? 'Spin the wheel to win amazing prizes!' 
                             : 'Scratch to reveal your prize!'}
                     </p>
                 </div>
 
-                {campaign.type === 'spin' ? (
+                {campaign.campaign_type === 'spin' ? (
                     <div>
                         {needsRegistration ? (
                             <UserRegistrationModal onRegister={handleRegistration} />
