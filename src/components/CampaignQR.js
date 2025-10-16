@@ -68,7 +68,7 @@ const CampaignQR = ({ url, campaignName }) => {
         <div className="flex flex-col items-center p-6 bg-white rounded-lg shadow-lg">
             <div className="bg-white p-4 rounded-lg shadow">
                 <QRCodeSVG 
-                    value={`http://localhost:1234${url}`} 
+                    value={`https://coffercard.com${url}`}
                     size={300}
                     ref={qrRef}
                     level="H"
@@ -101,7 +101,7 @@ const CampaignQR = ({ url, campaignName }) => {
                 <div className="flex items-center gap-2">
                     <input
                         type="text"
-                        value={`http://localhost:1234${url}`}
+                        value={`https://coffercard.com${url}`}
                         readOnly
                         className="p-2 text-sm bg-gray-50 rounded border flex-1"
                     />
