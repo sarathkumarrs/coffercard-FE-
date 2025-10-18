@@ -82,8 +82,8 @@ const PrizeModal = ({ campaign, onClose }) => {
             if (newPrize.is_winning) {
                 payload.quantity = parseInt(newPrize.quantity);
             } else {
-                // For non-winning outcomes, you might want to set quantity to 0 or null
-                payload.quantity = 0;  // or don't include it at all
+                // For non-winning outcomes, backend automatically sets quantity to 9999
+                payload.quantity = 9999;  // Backend will handle this, but send a value to satisfy validation
             }
 
             console.log('Sending payload:', payload);
@@ -233,7 +233,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                             <select
                                 value={newPrize.is_winning.toString()}
                                 onChange={e => setNewPrize({
-                                    ...newPrize, 
+                                    ...newPrize,
                                     is_winning: e.target.value === 'true',
                                     quantity: e.target.value === 'true' ? newPrize.quantity : ''
                                 })}
@@ -242,6 +242,11 @@ const PrizeModal = ({ campaign, onClose }) => {
                                 <option value="true">Prize</option>
                                 <option value="false">Non-winning Outcome</option>
                             </select>
+                            {!newPrize.is_winning && (
+                                <p className="text-xs text-blue-600 mt-1">
+                                    Note: Quantity is automatically set to unlimited for non-winning outcomes
+                                </p>
+                            )}
                         </div>
                         <div>
                             <label className="block text-sm font-medium mb-1">Description</label>
