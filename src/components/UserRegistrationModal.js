@@ -6,9 +6,33 @@ const UserRegistrationModal = ({onSubmit, onClose }) => {
         email: '',
         phone: ''
     });
+    const [errors, setErrors] = useState({});
+
+    const validatePhone = (phone) => {
+        // Remove any non-digit characters for validation
+        const digitsOnly = phone.replace(/\D/g, '');
+        return digitsOnly.length === 10;
+    };
+
+    const handlePhoneChange = (e) => {
+        const phone = e.target.value;
+        setFormData({...formData, phone});
+
+        // Clear error when user starts typing
+        if (errors.phone) {
+            setErrors({...errors, phone: ''});
+        }
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // Validate phone number
+        if (!validatePhone(formData.phone)) {
+            setErrors({...errors, phone: 'Phone number must be exactly 10 digits'});
+            return;
+        }
+
         await onSubmit(formData);
     };
 
@@ -42,10 +66,13 @@ const UserRegistrationModal = ({onSubmit, onClose }) => {
                         <input
                             type="tel"
                             value={formData.phone}
-                            onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                            className="w-full p-2 border rounded"
+                            onChange={handlePhoneChange}
+                            className={`w-full p-2 border rounded ${errors.phone ? 'border-red-500' : ''}`}
                             required
                         />
+                        {errors.phone && (
+                            <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                        )}
                     </div>
                     <button
                         type="submit"

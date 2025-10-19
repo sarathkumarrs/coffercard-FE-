@@ -21,6 +21,7 @@ const DashboardPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [downloadModal, setDownloadModal] = useState({
         isOpen: false,
         campaignId: null,
@@ -116,11 +117,23 @@ const DashboardPage = () => {
     }, []);
 
     // Safe filter with array validation
-    const filteredClaims = Array.isArray(claims) ? claims.filter(claim =>
-        claim.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        claim.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        claim.prize_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) : [];
+    const filteredClaims = Array.isArray(claims) ? claims.filter(claim => {
+        // Filter by search term
+        const matchesSearch =
+            claim.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            claim.user_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            claim.prize_name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Filter by selected campaign if one is selected
+        const matchesCampaign = selectedCampaign === null || claim.campaign_id === selectedCampaign;
+
+        return matchesSearch && matchesCampaign;
+    }) : [];
+
+    const handleCampaignClick = (campaignId) => {
+        setSelectedCampaign(campaignId === selectedCampaign ? null : campaignId);
+        setSearchTerm(''); // Clear search when switching campaigns
+    };
 
     const handleMarkRedeemed = async (claimId) => {
         try {
@@ -336,8 +349,23 @@ const DashboardPage = () => {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {campaigns.map(campaign => (
-                                <div key={campaign.id} className="border rounded-lg p-4">
-                                    <h4 className="font-semibold text-lg mb-2">{campaign.name}</h4>
+                                <div
+                                    key={campaign.id}
+                                    onClick={() => handleCampaignClick(campaign.id)}
+                                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                                        selectedCampaign === campaign.id
+                                            ? 'border-blue-500 bg-blue-50 shadow-md'
+                                            : 'border-gray-300 hover:border-blue-300 hover:shadow-sm'
+                                    }`}
+                                >
+                                    <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-semibold text-lg">{campaign.name}</h4>
+                                        {selectedCampaign === campaign.id && (
+                                            <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded">
+                                                Selected
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="text-sm text-gray-600">
                                         <p>Type: {campaign.campaign_type}</p>
                                         <p>Start: {new Date(campaign.start_date).toLocaleDateString()}</p>
@@ -346,11 +374,14 @@ const DashboardPage = () => {
                                             Claims: {Array.isArray(claims) ? claims.filter(c => c.campaign_id === campaign.id).length : 0} / {campaign.max_claims}
                                         </p>
                                         <button
-                                            onClick={() => setDownloadModal({
-                                                isOpen: true,
-                                                campaignId: campaign.id,
-                                                campaignName: campaign.name
-                                            })}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setDownloadModal({
+                                                    isOpen: true,
+                                                    campaignId: campaign.id,
+                                                    campaignName: campaign.name
+                                                });
+                                            }}
                                             className="mt-2 text-blue-500 hover:text-blue-700 text-sm"
                                         >
                                             Download Claims
@@ -367,7 +398,21 @@ const DashboardPage = () => {
             <div className="bg-white rounded-lg shadow">
                 <div className="px-6 py-4 border-b">
                     <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">Recent Claims</h3>
+                        <div className="flex items-center gap-4">
+                            <h3 className="text-lg font-semibold">
+                                {selectedCampaign
+                                    ? `Claims for: ${campaigns.find(c => c.id === selectedCampaign)?.name || 'Unknown'}`
+                                    : 'Recent Claims (All Campaigns)'}
+                            </h3>
+                            {selectedCampaign && (
+                                <button
+                                    onClick={() => setSelectedCampaign(null)}
+                                    className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                                >
+                                    Show All Campaigns
+                                </button>
+                            )}
+                        </div>
                         <input
                             type="text"
                             placeholder="Search claims..."

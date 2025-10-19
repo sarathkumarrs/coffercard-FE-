@@ -5,6 +5,39 @@ import CampaignQR from '../components/CampaignQR';
 import { BASE_URL } from '../services/api';
 import { Trash2 } from 'lucide-react';
 
+// Countdown Timer Component
+const CountdownTimer = ({ scheduledTime, onExpire }) => {
+    const [timeLeft, setTimeLeft] = useState('');
+
+    useEffect(() => {
+        const updateTimer = () => {
+            const now = new Date();
+            const target = new Date(scheduledTime);
+            const diff = target - now;
+
+            if (diff <= 0) {
+                setTimeLeft('Deleting...');
+                if (onExpire) onExpire();
+                return;
+            }
+
+            const minutes = Math.floor(diff / 60000);
+            const seconds = Math.floor((diff % 60000) / 1000);
+            setTimeLeft(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+
+        return () => clearInterval(interval);
+    }, [scheduledTime, onExpire]);
+
+    return (
+        <span className="font-mono text-red-600 font-semibold">
+            {timeLeft}
+        </span>
+    );
+};
 
 const CampaignsPage = () => {
     console.log('CampaignsPage Component Rendered');
@@ -55,25 +88,57 @@ const CampaignsPage = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('access_token');
+
+            // Clean up the data before sending
+            const campaignData = {
+                ...editingCampaign,
+                instagram_link: editingCampaign.instagram_link || '',
+                facebook_link: editingCampaign.facebook_link || '',
+                guidelines: editingCampaign.guidelines || ''
+            };
+
+            console.log('Updating campaign with data:', campaignData);
+
             const response = await fetch(`${BASE_URL}/campaigns/${editingCampaign.id}/`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(editingCampaign)
+                body: JSON.stringify(campaignData)
             });
-    
+
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
-                throw new Error('Failed to update campaign');
+                const errorData = await response.json().catch(() => null);
+                console.error('Update failed with error:', errorData);
+
+                // Format error messages from validation errors
+                let errorMessage = 'Failed to update campaign';
+                if (errorData) {
+                    if (errorData.detail) {
+                        errorMessage = errorData.detail;
+                    } else if (errorData.message) {
+                        errorMessage = errorData.message;
+                    } else if (typeof errorData === 'object') {
+                        // Handle field-specific validation errors
+                        const errors = Object.entries(errorData)
+                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                            .join('\n');
+                        errorMessage = errors || 'Failed to update campaign';
+                    }
+                }
+
+                throw new Error(errorMessage);
             }
-    
+
             setEditModalOpen(false);
             setEditingCampaign(null);
             fetchCampaigns(); // Refresh the list
         } catch (error) {
             console.error('Error updating campaign:', error);
-            alert('Failed to update campaign');
+            alert(`Failed to update campaign: ${error.message}`);
         }
     };
 
@@ -124,10 +189,10 @@ const CampaignsPage = () => {
 
     const handleDeleteCampaign = async (campaignId) => {
         // Show confirmation dialog
-        if (!window.confirm('Are you sure you want to delete this campaign?')) {
+        if (!window.confirm('Are you sure you want to delete this campaign? You will have 5 minutes to cancel.')) {
             return;
         }
-    
+
         try {
             const token = localStorage.getItem('access_token');
             const response = await fetch(`${BASE_URL}/campaigns/${campaignId}/`, {
@@ -137,16 +202,59 @@ const CampaignsPage = () => {
                     'Content-Type': 'application/json'
                 }
             });
-    
+
             if (!response.ok) {
-                throw new Error('Failed to delete campaign');
+                throw new Error('Failed to schedule campaign for deletion');
             }
-    
+
+            const data = await response.json();
+            console.log('Campaign scheduled for deletion:', data);
+
+            // Refresh campaigns list to show the scheduled deletion
+            fetchCampaigns();
+
+            // Schedule cleanup after 5 minutes
+            setTimeout(async () => {
+                try {
+                    await fetch(`${BASE_URL}/campaigns/cleanup_deleted/`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    fetchCampaigns();
+                } catch (cleanupError) {
+                    console.error('Cleanup error:', cleanupError);
+                }
+            }, 5 * 60 * 1000); // 5 minutes
+
+        } catch (error) {
+            console.error('Error deleting campaign:', error);
+            alert('Failed to schedule campaign for deletion');
+        }
+    };
+
+    const handleCancelDeletion = async (campaignId) => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${BASE_URL}/campaigns/${campaignId}/cancel_deletion/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to cancel deletion');
+            }
+
             // Refresh campaigns list
             fetchCampaigns();
         } catch (error) {
-            console.error('Error deleting campaign:', error);
-            alert('Failed to delete campaign');
+            console.error('Error cancelling deletion:', error);
+            alert('Failed to cancel deletion');
         }
     };
 
@@ -172,37 +280,66 @@ const CampaignsPage = () => {
 
             <div className="grid gap-4">
     {campaigns.map((campaign) => (
-        <div key={campaign.id} className="bg-white p-4 rounded shadow">
+        <div
+            key={campaign.id}
+            className={`bg-white p-4 rounded shadow ${
+                campaign.scheduled_for_deletion ? 'border-2 border-red-500 bg-red-50' : ''
+            }`}
+        >
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">{campaign.name}</h3>
+                <div>
+                    <h3 className="text-lg font-medium">{campaign.name}</h3>
+                    {campaign.scheduled_for_deletion && (
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm text-red-600 font-semibold">
+                                Deleting in:
+                            </span>
+                            <CountdownTimer
+                                scheduledTime={campaign.scheduled_for_deletion}
+                                onExpire={() => fetchCampaigns()}
+                            />
+                        </div>
+                    )}
+                </div>
                 <div className="flex space-x-2">
-                    <button
-                        onClick={() => {
-                            setEditingCampaign({...campaign});
-                            setEditModalOpen(true);
-                        }}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
-                    >
-                        Edit
-                    </button>
-                    <button
-                        onClick={() => handleManagePrizes(campaign)}
-                        className="bg-indigo-500 text-white px-3 py-1 rounded text-sm hover:bg-indigo-600"
-                    >
-                        Manage Prizes
-                    </button>
-                    <button
-                        onClick={() => setSelectedCampaignForQR(campaign)}
-                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
-                    >
-                        Show QR
-                    </button>
-                    <button
-                        onClick={() => handleDeleteCampaign(campaign.id)}
-                        className="text-red-500 hover:text-red-700 p-1"
-                    >
-                        <Trash2 size={18} />
-                    </button>
+                    {campaign.scheduled_for_deletion ? (
+                        <button
+                            onClick={() => handleCancelDeletion(campaign.id)}
+                            className="bg-orange-500 text-white px-3 py-1 rounded text-sm hover:bg-orange-600"
+                        >
+                            Cancel Deletion
+                        </button>
+                    ) : (
+                        <>
+                            <button
+                                onClick={() => {
+                                    setEditingCampaign({...campaign});
+                                    setEditModalOpen(true);
+                                }}
+                                className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+                            >
+                                Edit
+                            </button>
+                            <button
+                                onClick={() => handleManagePrizes(campaign)}
+                                className="bg-indigo-500 text-white px-3 py-1 rounded text-sm hover:bg-indigo-600"
+                            >
+                                Manage Prizes
+                            </button>
+                            <button
+                                onClick={() => setSelectedCampaignForQR(campaign)}
+                                className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                            >
+                                Show QR
+                            </button>
+                            <button
+                                onClick={() => handleDeleteCampaign(campaign.id)}
+                                className="text-red-500 hover:text-red-700 p-1"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
             <p className="text-gray-600">Type: {campaign.campaign_type}</p>
@@ -331,8 +468,9 @@ const CampaignsPage = () => {
                                                 value={newCampaign.instagram_link}
                                                 onChange={e => setNewCampaign({...newCampaign, instagram_link: e.target.value})}
                                                 className="w-full p-2 border rounded"
-                                                placeholder="https://instagram.com/..."
+                                                placeholder="https://instagram.com/yourpage"
                                             />
+                                            <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
                                         </div>
 
                                         <div className="mb-4">
@@ -342,8 +480,9 @@ const CampaignsPage = () => {
                                                 value={newCampaign.facebook_link}
                                                 onChange={e => setNewCampaign({...newCampaign, facebook_link: e.target.value})}
                                                 className="w-full p-2 border rounded"
-                                                placeholder="https://facebook.com/..."
+                                                placeholder="https://facebook.com/yourpage"
                                             />
+                                            <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
                                         </div>
 
                                         <div className="mb-4">
@@ -461,6 +600,37 @@ const CampaignsPage = () => {
                                             className="w-full p-2 border rounded"
                                         />
                                     </div>
+                                    <div>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={editingCampaign.is_in_store || false}
+                                                onChange={e => setEditingCampaign({
+                                                    ...editingCampaign,
+                                                    is_in_store: e.target.checked
+                                                })}
+                                                className="mr-2"
+                                            />
+                                            <div>
+                                                <span className="font-medium">In-store Campaign</span>
+                                                <p className="text-sm text-gray-500">Enable this if the campaign will be used at point of sale for different customers</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label className="flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={editingCampaign.show_social_page || false}
+                                                onChange={e => setEditingCampaign({
+                                                    ...editingCampaign,
+                                                    show_social_page: e.target.checked
+                                                })}
+                                                className="mr-2"
+                                            />
+                                            Show social media follow page before game
+                                        </label>
+                                    </div>
                                     {editingCampaign.show_social_page && (
                                         <>
                                             <div>
@@ -473,7 +643,9 @@ const CampaignsPage = () => {
                                                         instagram_link: e.target.value
                                                     })}
                                                     className="w-full p-2 border rounded"
+                                                    placeholder="https://instagram.com/yourpage"
                                                 />
+                                                <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
                                             </div>
                                             <div>
                                                 <label className="block mb-2">Facebook Link</label>
@@ -485,7 +657,9 @@ const CampaignsPage = () => {
                                                         facebook_link: e.target.value
                                                     })}
                                                     className="w-full p-2 border rounded"
+                                                    placeholder="https://facebook.com/yourpage"
                                                 />
+                                                <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
                                             </div>
                                             <div>
                                                 <label className="block mb-2">Guidelines</label>
@@ -497,6 +671,7 @@ const CampaignsPage = () => {
                                                     })}
                                                     className="w-full p-2 border rounded"
                                                     rows="4"
+                                                    placeholder="Enter each guideline on a new line"
                                                 />
                                             </div>
                                         </>

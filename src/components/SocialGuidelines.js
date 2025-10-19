@@ -19,6 +19,17 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
         }, 500);
     };
 
+    // Helper function to ensure URL has proper protocol
+    const ensureProtocol = (url) => {
+        if (!url) return '';
+        // Check if URL already has http:// or https://
+        if (url.match(/^https?:\/\//i)) {
+            return url;
+        }
+        // Add https:// if missing
+        return `https://${url}`;
+    };
+
     const guidelines = campaign.guidelines.split('\n').filter(line => line.trim());
 
     return (
@@ -69,7 +80,7 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                 <div className="space-y-4">
                     {campaign.instagram_link && (
                         <a
-                            href={campaign.instagram_link}
+                            href={ensureProtocol(campaign.instagram_link)}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => handleSocialClick('instagram')}
@@ -100,7 +111,7 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                     
                     {campaign.facebook_link && (
                         <a
-                            href={campaign.facebook_link}
+                            href={ensureProtocol(campaign.facebook_link)}
                             target="_blank"
                             rel="noopener noreferrer"
                             onClick={() => handleSocialClick('facebook')}

@@ -11,6 +11,7 @@ const PrizeModal = ({ campaign, onClose }) => {
         is_winning: true
     });
     const [error, setError] = useState(null);
+    const [editingPrize, setEditingPrize] = useState(null);
 
     useEffect(() => {
         fetchPrizes();
@@ -38,23 +39,49 @@ const PrizeModal = ({ campaign, onClose }) => {
         }
     };
 
+    const handleEditClick = (prize) => {
+        setEditingPrize(prize.id);
+        setNewPrize({
+            name: prize.name,
+            description: prize.description,
+            probability: prize.probability.toString(),
+            quantity: prize.quantity.toString(),
+            is_winning: prize.is_winning
+        });
+        setError(null);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingPrize(null);
+        setNewPrize({
+            name: '',
+            description: '',
+            probability: '',
+            quantity: '',
+            is_winning: true
+        });
+        setError(null);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
-        
+
         try {
             const token = localStorage.getItem('access_token');
-            
+
             // Validate probability
             const newProb = parseFloat(newPrize.probability);
             if (isNaN(newProb) || newProb < 0 || newProb > 100) {
                 setError('Probability must be between 0 and 100');
                 return;
             }
-            
-            const totalProbability = prizes.reduce((sum, prize) => 
-                sum + (parseFloat(prize.probability) || 0), 0);
-            
+
+            // Calculate total probability excluding the prize being edited
+            const totalProbability = prizes
+                .filter(prize => prize.id !== editingPrize)
+                .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
             if (totalProbability + newProb > 100) {
                 setError(`Total probability cannot exceed 100%. Current: ${totalProbability}%, Adding: ${newProb}%`);
                 return;
@@ -69,12 +96,12 @@ const PrizeModal = ({ campaign, onClose }) => {
                 }
             }
 
-            // Prepare payload - FIXED: Added is_winning field
+            // Prepare payload
             const payload = {
                 name: newPrize.name.trim(),
                 description: newPrize.description.trim(),
                 probability: newProb,
-                is_winning: newPrize.is_winning,  // THIS WAS MISSING!
+                is_winning: newPrize.is_winning,
                 campaign: campaign.id
             };
 
@@ -82,14 +109,19 @@ const PrizeModal = ({ campaign, onClose }) => {
             if (newPrize.is_winning) {
                 payload.quantity = parseInt(newPrize.quantity);
             } else {
-                // For non-winning outcomes, backend automatically sets quantity to 9999
-                payload.quantity = 9999;  // Backend will handle this, but send a value to satisfy validation
+                payload.quantity = 9999;
             }
 
             console.log('Sending payload:', payload);
 
-            const response = await fetch(`${BASE_URL}/prizes/`, {
-                method: 'POST',
+            // Determine if creating or updating
+            const url = editingPrize
+                ? `${BASE_URL}/prizes/${editingPrize}/`
+                : `${BASE_URL}/prizes/`;
+            const method = editingPrize ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -111,10 +143,11 @@ const PrizeModal = ({ campaign, onClose }) => {
                 quantity: '',
                 is_winning: true
             });
+            setEditingPrize(null);
             setError(null);
         } catch (err) {
-            console.error('Error creating prize:', err);
-            setError('Failed to create prize: ' + err.message);
+            console.error(`Error ${editingPrize ? 'updating' : 'creating'} prize:`, err);
+            setError(`Failed to ${editingPrize ? 'update' : 'create'} prize: ` + err.message);
         }
     };
 
@@ -200,15 +233,23 @@ const PrizeModal = ({ campaign, onClose }) => {
                                             {prize.is_winning && prize.quantity > 0 && <span>Quantity: {prize.quantity}</span>}
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => {
-                                            console.log('Deleting prize with ID:', prize.id);
-                                            handleDeletePrize(prize.id);
-                                        }}
-                                        className="text-red-500 hover:text-red-700 ml-4"
-                                    >
-                                        Delete
-                                    </button>
+                                    <div className="flex gap-2 ml-4">
+                                        <button
+                                            onClick={() => handleEditClick(prize)}
+                                            className="text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50"
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                console.log('Deleting prize with ID:', prize.id);
+                                                handleDeletePrize(prize.id);
+                                            }}
+                                            className="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
@@ -216,7 +257,20 @@ const PrizeModal = ({ campaign, onClose }) => {
                 </div>
 
                 <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold mb-4">Add New Prize</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">
+                            {editingPrize ? 'Edit Prize' : 'Add New Prize'}
+                        </h3>
+                        {editingPrize && (
+                            <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="text-gray-500 hover:text-gray-700 text-sm"
+                            >
+                                Cancel Edit
+                            </button>
+                        )}
+                    </div>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium mb-1">Prize Name</label>
@@ -287,13 +341,22 @@ const PrizeModal = ({ campaign, onClose }) => {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end">
-                            <button 
-                                type="submit" 
+                        <div className="flex justify-end gap-2">
+                            {editingPrize && (
+                                <button
+                                    type="button"
+                                    onClick={handleCancelEdit}
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                                >
+                                    Cancel
+                                </button>
+                            )}
+                            <button
+                                type="submit"
                                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
                                 disabled={totalProbability + parseFloat(newPrize.probability || 0) > 100}
                             >
-                                Add Prize
+                                {editingPrize ? 'Update Prize' : 'Add Prize'}
                             </button>
                         </div>
                     </form>
