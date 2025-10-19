@@ -1,14 +1,12 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../services/api';
-import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  // const navigate = useNavigate();
 
   // Check authentication status and token validity
   useEffect(() => {
@@ -91,7 +89,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('refresh_token');
     localStorage.removeItem('user');
     setUser(null);
-    navigate('/login');
+    // Use window.location instead of navigate since this is in a context provider
+    window.location.href = '/login';
   };
 
   // Expose handleLogout as logout to components
