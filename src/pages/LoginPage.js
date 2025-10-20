@@ -37,6 +37,8 @@ const LoginPage = () => {
     setResetMessage('');
 
     try {
+      console.log('Sending password reset request for:', resetEmail);
+
       const response = await fetch(`${BASE_URL}/password-reset/`, {
         method: 'POST',
         headers: {
@@ -45,19 +47,44 @@ const LoginPage = () => {
         body: JSON.stringify({ email: resetEmail }),
       });
 
+      console.log('Response status:', response.status);
+
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to send reset email');
+        // Show detailed error message from backend
+        const errorMsg = data.error || data.details || 'Failed to send reset email';
+        console.error('Password reset failed:', errorMsg);
+
+        // If we have a reset URL in the error response (for testing), log it
+        if (data.reset_url) {
+          console.log('Reset URL (for testing):', data.reset_url);
+          console.log('UID:', data.uid);
+          console.log('Token:', data.token);
+        }
+
+        throw new Error(errorMsg);
       }
 
-      setResetMessage('Password reset instructions have been sent to your email.');
+      // Success
+      setResetMessage(data.message || 'Password reset instructions have been sent to your email.');
+      console.log('Password reset email sent successfully');
+
+      // Log reset URL for testing (backend includes this in development)
+      if (data.reset_url) {
+        console.log('Reset URL (for testing):', data.reset_url);
+        console.log('UID:', data.uid);
+        console.log('Token:', data.token);
+      }
+
       setResetEmail('');
       setTimeout(() => {
         setShowForgotPassword(false);
         setResetMessage('');
-      }, 3000);
+      }, 5000);
     } catch (err) {
+      console.error('Password reset error:', err);
       setResetError(err.message || 'Failed to send reset email. Please try again.');
     } finally {
       setIsSubmittingReset(false);

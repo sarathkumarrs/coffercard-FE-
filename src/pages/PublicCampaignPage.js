@@ -305,7 +305,7 @@ const PublicCampaignPage = () => {
                         {wonPrize && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                                 <div className="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-                                    <h2 className="text-2xl font-bold text-center mb-4">  
+                                    <h2 className="text-2xl font-bold text-center mb-4">
                                         {wonPrize.is_winning ? '🎉 Congratulations! 🎉' : '🎲 Result'}
                                     </h2>
                                     <p className="text-xl text-center mb-6">
@@ -318,6 +318,19 @@ const PublicCampaignPage = () => {
                                     <p className="text-gray-600 text-center mb-6">
                                         {wonPrize.description}
                                     </p>
+
+                                    {wonPrize.is_winning && (
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                            <p className="text-sm text-blue-800 text-center">
+                                                📧 <strong>Check your email!</strong>
+                                            </p>
+                                            <p className="text-xs text-blue-600 text-center mt-2">
+                                                We've sent you an email with prize details and redemption instructions.
+                                                Please check your <strong>inbox, promotions, or spam folder</strong>.
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <button
                                         onClick={handlePlayAgain}
                                         className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"

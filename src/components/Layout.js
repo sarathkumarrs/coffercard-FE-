@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, Phone } from 'lucide-react';
+import { AlertCircle, Phone, Settings } from 'lucide-react';
 
 const RenewalModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -169,6 +169,17 @@ const Layout = ({ children }) => {
                   }`}
                 >
                   Campaigns
+                </Link>
+                <Link
+                  to="/settings"
+                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
+                    isActive('/settings')
+                      ? 'border-indigo-500 text-gray-900'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 mr-1" />
+                  Settings
                 </Link>
               </div>
             </div>
