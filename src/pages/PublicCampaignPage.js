@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import SpinWheel from '../components/SpinWheel';
 import { BASE_URL } from '../services/api';
 import ScratchCard from '../components/ScratchCard';
@@ -245,11 +246,39 @@ const PublicCampaignPage = () => {
 
     if (!campaign) return <div>Campaign not found</div>;
 
+    // Generate dynamic meta description
+    const metaTitle = `${campaign.name} - Win Amazing Prizes!`;
+    const metaDescription = campaign.campaign_type === 'spin'
+        ? `Spin the wheel and win amazing prizes in ${campaign.name}! Join now for a chance to win exclusive rewards.`
+        : `Scratch and reveal your prize in ${campaign.name}! Play now and win exciting rewards.`;
+    const campaignUrl = `${window.location.origin}/campaign/${code}`;
+
     // Render logic with proper state checks
     return (
         <>
+            <Helmet>
+                {/* Primary Meta Tags */}
+                <title>{metaTitle}</title>
+                <meta name="title" content={metaTitle} />
+                <meta name="description" content={metaDescription} />
+
+                {/* Open Graph / Facebook / WhatsApp */}
+                <meta property="og:type" content="website" />
+                <meta property="og:url" content={campaignUrl} />
+                <meta property="og:title" content={metaTitle} />
+                <meta property="og:description" content={metaDescription} />
+                <meta property="og:image" content="https://coffercard.com/og-campaign.jpg" />
+
+                {/* Twitter */}
+                <meta property="twitter:card" content="summary_large_image" />
+                <meta property="twitter:url" content={campaignUrl} />
+                <meta property="twitter:title" content={metaTitle} />
+                <meta property="twitter:description" content={metaDescription} />
+                <meta property="twitter:image" content="https://coffercard.com/og-campaign.jpg" />
+            </Helmet>
+
             {needsUserDetails ? (
-                <UserRegistrationModal 
+                <UserRegistrationModal
                     onSubmit={handleUserSubmit}
                     onClose={() => campaign.is_in_store ? null : setNeedsUserDetails(false)}
                 />
