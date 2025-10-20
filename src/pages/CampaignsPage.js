@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PrizeModal from '../components/PrizeModal';
 import CampaignQR from '../components/CampaignQR';
@@ -67,7 +67,7 @@ const CampaignsPage = () => {
 
 
     // Fetch campaigns
-    const fetchCampaigns = async () => {
+    const fetchCampaigns = useCallback(async () => {
         try {
             const token = localStorage.getItem('access_token');
             const response = await fetch(`${BASE_URL}/campaigns/`, {
@@ -82,7 +82,7 @@ const CampaignsPage = () => {
         } catch (error) {
             console.error('Error fetching campaigns:', error);
         }
-    };
+    }, []); // Empty dependency array means this function reference stays stable
 
     const handleEditCampaign = async (e) => {
         e.preventDefault();
@@ -204,7 +204,9 @@ const CampaignsPage = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to schedule campaign for deletion');
+                const errorText = await response.text();
+                console.error('Delete failed:', response.status, errorText);
+                throw new Error(`Failed to schedule campaign for deletion (${response.status}): ${errorText}`);
             }
 
             const data = await response.json();
@@ -296,7 +298,7 @@ const CampaignsPage = () => {
                             </span>
                             <CountdownTimer
                                 scheduledTime={campaign.scheduled_for_deletion}
-                                onExpire={() => fetchCampaigns()}
+                                onExpire={fetchCampaigns}
                             />
                         </div>
                     )}
