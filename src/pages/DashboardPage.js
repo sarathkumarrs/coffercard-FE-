@@ -13,7 +13,7 @@ import {
     Pie,
     Cell
 } from 'recharts';
-import { BASE_URL } from '../services/api';
+import { BASE_URL, fetchWithAuth } from '../services/api';
 
 const DashboardPage = () => {
     const [campaigns, setCampaigns] = useState([]);
@@ -43,26 +43,9 @@ const DashboardPage = () => {
         try {
             setLoading(true);
             setError(null);
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                handleAuthError();
-                return;
-            }
 
             // Fetch all campaigns
-            const campaignsResponse = await fetch(`${BASE_URL}/campaigns/`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Check for auth errors
-            if (campaignsResponse.status === 401) {
-                handleAuthError();
-                return;
-            }
+            const campaignsResponse = await fetchWithAuth(`${BASE_URL}/campaigns/`);
 
             if (!campaignsResponse.ok) {
                 throw new Error('Failed to fetch campaigns');
@@ -77,18 +60,7 @@ const DashboardPage = () => {
             }
 
             // Fetch all claims
-            const claimsResponse = await fetch(`${BASE_URL}/claims/`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            // Check for auth errors
-            if (claimsResponse.status === 401) {
-                handleAuthError();
-                return;
-            }
+            const claimsResponse = await fetchWithAuth(`${BASE_URL}/claims/`);
 
             if (!claimsResponse.ok) {
                 throw new Error('Failed to fetch claims');
@@ -137,25 +109,9 @@ const DashboardPage = () => {
 
     const handleMarkRedeemed = async (claimId) => {
         try {
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                handleAuthError();
-                return;
-            }
-
-            const response = await fetch(`${BASE_URL}/claims/${claimId}/mark_redeemed/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            const response = await fetchWithAuth(`${BASE_URL}/claims/${claimId}/mark_redeemed/`, {
+                method: 'POST'
             });
-
-            if (response.status === 401) {
-                handleAuthError();
-                return;
-            }
 
             if (!response.ok) {
                 throw new Error('Failed to mark claim as redeemed');
@@ -235,26 +191,9 @@ const DashboardPage = () => {
                 ...(dateRange.endDate && { end_date: dateRange.endDate })
             });
 
-            const token = localStorage.getItem('access_token');
-
-            if (!token) {
-                handleAuthError();
-                return;
-            }
-
-            const response = await fetch(
-                `${BASE_URL}/campaigns/${downloadModal.campaignId}/download-claims/?${queryParams}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                }
+            const response = await fetchWithAuth(
+                `${BASE_URL}/campaigns/${downloadModal.campaignId}/download-claims/?${queryParams}`
             );
-
-            if (response.status === 401) {
-                handleAuthError();
-                return;
-            }
 
             if (!response.ok) throw new Error('Download failed');
 

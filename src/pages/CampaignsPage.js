@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PrizeModal from '../components/PrizeModal';
 import CampaignQR from '../components/CampaignQR';
-import { BASE_URL } from '../services/api';
+import { BASE_URL, fetchWithAuth } from '../services/api';
 import { Trash2 } from 'lucide-react';
 
 // Countdown Timer Component
@@ -64,18 +64,24 @@ const CampaignsPage = () => {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingCampaign, setEditingCampaign] = useState(null);
 
+    // Helper function to convert UTC datetime to local datetime string for datetime-local input
+    const convertUTCToLocal = (utcDateString) => {
+        const date = new Date(utcDateString);
+        // Get local date and format as YYYY-MM-DDTHH:mm for datetime-local input
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
+
 
 
     // Fetch campaigns
     const fetchCampaigns = useCallback(async () => {
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(`${BASE_URL}/campaigns/`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/`);
             const data = await response.json();
             setCampaigns(data);
             console.log('Campaigns:', data);
@@ -87,24 +93,21 @@ const CampaignsPage = () => {
     const handleEditCampaign = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('access_token');
-
             // Clean up the data before sending
             const campaignData = {
                 ...editingCampaign,
                 instagram_link: editingCampaign.instagram_link || '',
                 facebook_link: editingCampaign.facebook_link || '',
-                guidelines: editingCampaign.guidelines || ''
+                guidelines: editingCampaign.guidelines || '',
+                // Convert local datetime to ISO string with timezone
+                start_date: new Date(editingCampaign.start_date).toISOString(),
+                end_date: new Date(editingCampaign.end_date).toISOString()
             };
 
             console.log('Updating campaign with data:', campaignData);
 
-            const response = await fetch(`${BASE_URL}/campaigns/${editingCampaign.id}/`, {
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/${editingCampaign.id}/`, {
                 method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
                 body: JSON.stringify(campaignData)
             });
 
@@ -150,18 +153,20 @@ const CampaignsPage = () => {
     const handleCreateCampaign = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('access_token');
             const { vendor, ...campaignData } = newCampaign;
 
-            console.log('Sending campaign data:', campaignData);
+            // Convert local datetime to ISO string with timezone
+            const dataToSend = {
+                ...campaignData,
+                start_date: new Date(campaignData.start_date).toISOString(),
+                end_date: new Date(campaignData.end_date).toISOString()
+            };
 
-            const response = await fetch(`${BASE_URL}/campaigns/`, {
+            console.log('Sending campaign data:', dataToSend);
+
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/`, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(campaignData)
+                body: JSON.stringify(dataToSend)
             });
 
             if (!response.ok) {
@@ -194,13 +199,8 @@ const CampaignsPage = () => {
         }
 
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(`${BASE_URL}/campaigns/${campaignId}/`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/${campaignId}/`, {
+                method: 'DELETE'
             });
 
             if (!response.ok) {
@@ -218,12 +218,8 @@ const CampaignsPage = () => {
             // Schedule cleanup after 5 minutes
             setTimeout(async () => {
                 try {
-                    await fetch(`${BASE_URL}/campaigns/cleanup_deleted/`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
-                        }
+                    await fetchWithAuth(`${BASE_URL}/campaigns/cleanup_deleted/`, {
+                        method: 'POST'
                     });
                     fetchCampaigns();
                 } catch (cleanupError) {
@@ -239,13 +235,8 @@ const CampaignsPage = () => {
 
     const handleCancelDeletion = async (campaignId) => {
         try {
-            const token = localStorage.getItem('access_token');
-            const response = await fetch(`${BASE_URL}/campaigns/${campaignId}/cancel_deletion/`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/${campaignId}/cancel_deletion/`, {
+                method: 'POST'
             });
 
             if (!response.ok) {
@@ -315,7 +306,11 @@ const CampaignsPage = () => {
                         <>
                             <button
                                 onClick={() => {
-                                    setEditingCampaign({...campaign});
+                                    setEditingCampaign({
+                                        ...campaign,
+                                        start_date: convertUTCToLocal(campaign.start_date),
+                                        end_date: convertUTCToLocal(campaign.end_date)
+                                    });
                                     setEditModalOpen(true);
                                 }}
                                 className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
@@ -570,7 +565,7 @@ const CampaignsPage = () => {
                                         <label className="block mb-2">Start Date</label>
                                         <input
                                             type="datetime-local"
-                                            value={editingCampaign.start_date.slice(0, 16)}
+                                            value={editingCampaign.start_date}
                                             onChange={e => setEditingCampaign({
                                                 ...editingCampaign,
                                                 start_date: e.target.value
@@ -582,7 +577,7 @@ const CampaignsPage = () => {
                                         <label className="block mb-2">End Date</label>
                                         <input
                                             type="datetime-local"
-                                            value={editingCampaign.end_date.slice(0, 16)}
+                                            value={editingCampaign.end_date}
                                             onChange={e => setEditingCampaign({
                                                 ...editingCampaign,
                                                 end_date: e.target.value
