@@ -115,14 +115,14 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
     };
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center px-2 sm:px-4">
             {error && (
-                <div className="mb-4 p-4 bg-red-100 text-red-700 rounded">
+                <div className="mb-4 p-3 sm:p-4 bg-red-100 text-red-700 rounded-lg text-sm sm:text-base w-full max-w-md">
                     {error}
                     {canShare && (
                         <button
                             onClick={handleShare}
-                            className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                            className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm sm:text-base"
                         >
                             Share to Unlock Another Spin
                         </button>
@@ -131,12 +131,12 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
             )}
 
             {spinsLeft !== null && (
-                <div className="mb-4 text-gray-600">
-                    Spins remaining: {spinsLeft}
+                <div className="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base font-medium">
+                    Spins remaining: <span className="font-bold text-blue-600">{spinsLeft}</span>
                 </div>
             )}
 
-            <div className="mb-8">
+            <div className="mb-6 sm:mb-8 w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px]">
                 <Wheel
                     mustStartSpinning={mustSpin}
                     prizeNumber={prizeNumber}
@@ -146,15 +146,19 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
                         onSpinComplete(prizes[prizeNumber]);
                         console.log('spin wheel', prizes);
                     }}
+                    outerBorderWidth={3}
+                    radiusLineWidth={1}
+                    fontSize={window.innerWidth < 640 ? 12 : 15}
+                    textDistance={60}
                 />
             </div>
 
             <button
                 onClick={handleSpinClick}
                 disabled={mustSpin}
-                className={`px-6 py-3 rounded-full text-white font-bold text-lg
-                    ${mustSpin 
-                        ? 'bg-gray-400 cursor-not-allowed' 
+                className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-base sm:text-lg shadow-lg
+                    ${mustSpin
+                        ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-blue-500 hover:bg-blue-600 animate-pulse'
                     }`}
             >

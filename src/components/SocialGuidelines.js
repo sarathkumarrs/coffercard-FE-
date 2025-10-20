@@ -33,51 +33,51 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
     const guidelines = campaign.guidelines.split('\n').filter(line => line.trim());
 
     return (
-        <div className="min-h-screen bg-[#ffff00] py-12 px-4"> {/* Bright yellow background */}
+        <div className="min-h-screen bg-[#ffff00] py-6 sm:py-12 px-4"> {/* Bright yellow background */}
             <div className="max-w-3xl mx-auto">
                 {/* Company Logo */}
-                <div className="flex justify-center mb-8">
-                    <div className="bg-white p-4 rounded-lg shadow-lg">
-                        {/* <img 
-                            src={campaign.vendor.logo} 
-                            alt="Company Logo" 
-                            className="h-20 w-auto"
+                <div className="flex justify-center mb-6 sm:mb-8">
+                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow-lg">
+                        {/* <img
+                            src={campaign.vendor.logo}
+                            alt="Company Logo"
+                            className="h-16 sm:h-20 w-auto"
                         /> */}
-                        <img 
-                            src="https://play.alusoodcargo.com/wp-content/uploads/2024/09/cropped-2.png" 
-                            alt="Company Logo" 
-                            className="h-20 w-auto"
+                        <img
+                            src="https://play.alusoodcargo.com/wp-content/uploads/2024/09/cropped-2.png"
+                            alt="Company Logo"
+                            className="h-16 sm:h-20 w-auto"
                         />
                     </div>
                 </div>
 
                 {/* Title */}
-                <h1 className="text-4xl font-bold text-[#ff1744] text-center mb-12"> {/* Bright red text */}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#ff1744] text-center mb-8 sm:mb-12"> {/* Bright red text */}
                     Let's Play!
                 </h1>
 
                 {/* Guidelines */}
-                <div className="bg-white rounded-xl shadow-xl p-8 mb-12 relative">
+                <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 md:p-8 mb-8 sm:mb-12 relative">
                     <div className="absolute -top-2 left-4 flex space-x-2">
-                        <div className="w-3 h-3 rounded-full bg-[#ff1744]"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#ffff00]"></div>
-                        <div className="w-3 h-3 rounded-full bg-[#2196f3]"></div>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#ff1744]"></div>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#ffff00]"></div>
+                        <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#2196f3]"></div>
                     </div>
-                    <h2 className="text-2xl font-bold text-[#ff1744] mb-6">
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#ff1744] mb-4 sm:mb-6">
                         Follow These Steps
                     </h2>
-                    <ol className="text-gray-800 space-y-4">
+                    <ol className="text-gray-800 space-y-3 sm:space-y-4 text-sm sm:text-base">
                         {guidelines.map((guideline, index) => (
                             <li key={index} className="flex items-start">
-                                <span className="mr-3 font-bold text-[#ff1744]">{index + 1}.</span>
-                                <span>{guideline}</span>
+                                <span className="mr-2 sm:mr-3 font-bold text-[#ff1744] flex-shrink-0">{index + 1}.</span>
+                                <span className="flex-1">{guideline}</span>
                             </li>
                         ))}
                     </ol>
                 </div>
 
                 {/* Social Media Buttons */}
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                     {campaign.instagram_link && (
                         <a
                             href={ensureProtocol(campaign.instagram_link)}
@@ -85,9 +85,9 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                             rel="noopener noreferrer"
                             onClick={() => handleSocialClick('instagram')}
                             className={`
-                                w-full bg-white text-[#ff1744] py-4 px-6 rounded-xl 
-                                flex items-center justify-center space-x-2 
-                                shadow-lg font-bold text-lg
+                                block w-full bg-white text-[#ff1744] py-3 sm:py-4 px-4 sm:px-6 rounded-xl
+                                flex items-center justify-center space-x-2
+                                shadow-lg font-bold text-base sm:text-lg
                                 transform transition-all duration-300
                                 ${socialClicks.instagram ? 'bg-green-100 text-green-600' : 'hover:bg-gray-50'}
                                 ${animating === 'instagram' ? 'animate-bounce scale-105' : ''}
@@ -97,7 +97,7 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                             <span className="flex items-center">
                                 {socialClicks.instagram ? (
                                     <>
-                                        <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                         Followed
@@ -108,7 +108,7 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                             </span>
                         </a>
                     )}
-                    
+
                     {campaign.facebook_link && (
                         <a
                             href={ensureProtocol(campaign.facebook_link)}
@@ -116,9 +116,9 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                             rel="noopener noreferrer"
                             onClick={() => handleSocialClick('facebook')}
                             className={`
-                                w-full bg-white text-[#ff1744] py-4 px-6 rounded-xl 
-                                flex items-center justify-center space-x-2 
-                                shadow-lg font-bold text-lg
+                                block w-full bg-white text-[#ff1744] py-3 sm:py-4 px-4 sm:px-6 rounded-xl
+                                flex items-center justify-center space-x-2
+                                shadow-lg font-bold text-base sm:text-lg
                                 transform transition-all duration-300
                                 ${socialClicks.facebook ? 'bg-green-100 text-green-600' : 'hover:bg-gray-50'}
                                 ${animating === 'facebook' ? 'animate-bounce scale-105' : ''}
@@ -128,7 +128,7 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                             <span className="flex items-center">
                                 {socialClicks.facebook ? (
                                     <>
-                                        <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                         </svg>
                                         Followed
@@ -144,9 +144,9 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                         onClick={onComplete}
                         disabled={!socialClicks.instagram || !socialClicks.facebook}
                         className={`
-                            w-full py-4 px-6 rounded-xl 
-                            flex items-center justify-center space-x-2 
-                            shadow-lg font-bold text-lg
+                            w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl
+                            flex items-center justify-center space-x-2
+                            shadow-lg font-bold text-base sm:text-lg
                             transform transition-all duration-500
                             ${(socialClicks.instagram && socialClicks.facebook)
                                 ? 'bg-[#ff1744] text-white hover:bg-[#ff1744]/90 hover:scale-105 animate-pulse'
@@ -155,9 +155,9 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                     >
                         {socialClicks.instagram && socialClicks.facebook ? (
                             <span className="flex items-center">
-                                <span className="animate-bounce">🎮</span>
+                                <span className="animate-bounce text-lg sm:text-xl">🎮</span>
                                 <span className="mx-2">Start Game</span>
-                                <span className="animate-bounce">🎮</span>
+                                <span className="animate-bounce text-lg sm:text-xl">🎮</span>
                             </span>
                         ) : (
                             'Start Game'
@@ -165,9 +165,9 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
                     </button>
                 </div>
 
-                {/* Decorative elements */}
-                <div className="fixed bottom-10 right-10 w-32 h-32 bg-[#ff1744] rounded-lg transform rotate-12 opacity-50"></div>
-                <div className="fixed top-10 left-10 w-24 h-24 bg-[#ff1744] rounded-full transform -rotate-12 opacity-50"></div>
+                {/* Decorative elements - hidden on mobile */}
+                <div className="hidden sm:block fixed bottom-10 right-10 w-24 h-24 md:w-32 md:h-32 bg-[#ff1744] rounded-lg transform rotate-12 opacity-50"></div>
+                <div className="hidden sm:block fixed top-10 left-10 w-20 h-20 md:w-24 md:h-24 bg-[#ff1744] rounded-full transform -rotate-12 opacity-50"></div>
             </div>
         </div>
     );

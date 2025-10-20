@@ -288,15 +288,15 @@ const PublicCampaignPage = () => {
                     onComplete={() => setShowSocialPage(false)}
                 />
             ) : (
-                <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-12 px-4">
+                <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-6 sm:py-12 px-4 pb-20">
                     <div className="max-w-3xl mx-auto">
-                        <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                        <div className="text-center mb-6 sm:mb-8">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 px-2">
                                 {campaign.name}
                             </h1>
-                            <p className="text-gray-600">
-                                {campaign.type === 'spin' 
-                                    ? 'Spin the wheel to win amazing prizes!' 
+                            <p className="text-sm sm:text-base text-gray-600 px-2">
+                                {campaign.type === 'spin'
+                                    ? 'Spin the wheel to win amazing prizes!'
                                     : 'Scratch to reveal your prize!'}
                             </p>
                         </div>
@@ -332,24 +332,24 @@ const PublicCampaignPage = () => {
                         )}
 
                         {wonPrize && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                <div className="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-                                    <h2 className="text-2xl font-bold text-center mb-4">
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
+                                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-3 sm:mb-4">
                                         {wonPrize.is_winning ? '🎉 Congratulations! 🎉' : '🎲 Result'}
                                     </h2>
-                                    <p className="text-xl text-center mb-6">
+                                    <p className="text-lg sm:text-xl text-center mb-4 sm:mb-6">
                                         {wonPrize.is_winning ? (
                                             <>You won: <span className="font-bold text-blue-600">{wonPrize.name}</span></>
                                         ) : (
                                             <span className="text-gray-700">{wonPrize.name}</span>
                                         )}
                                     </p>
-                                    <p className="text-gray-600 text-center mb-6">
+                                    <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
                                         {wonPrize.description}
                                     </p>
 
                                     {wonPrize.is_winning && (
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
                                             <p className="text-sm text-blue-800 text-center">
                                                 📧 <strong>Check your email!</strong>
                                             </p>
@@ -362,7 +362,7 @@ const PublicCampaignPage = () => {
 
                                     <button
                                         onClick={handlePlayAgain}
-                                        className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600"
+                                        className="w-full bg-blue-500 text-white py-2.5 sm:py-3 rounded-lg hover:bg-blue-600 text-sm sm:text-base font-medium"
                                     >
                                         {campaign.is_in_store ? 'Next Customer' : 'Play Again'}
                                     </button>
