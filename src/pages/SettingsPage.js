@@ -107,15 +107,15 @@ const SettingsPage = () => {
     }
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="p-4 sm:p-6 max-w-4xl mx-auto">
             <div className="bg-white rounded-lg shadow-md">
                 {/* Header */}
-                <div className="border-b border-gray-200 px-6 py-4">
-                    <div className="flex items-center">
-                        <SettingsIcon className="w-6 h-6 text-indigo-600 mr-3" />
+                <div className="border-b border-gray-200 px-4 sm:px-6 py-4">
+                    <div className="flex items-start sm:items-center">
+                        <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 mr-2 sm:mr-3 flex-shrink-0 mt-1 sm:mt-0" />
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Company Settings</h1>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Company Settings</h1>
+                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                 Manage your company information and prize redemption details
                             </p>
                         </div>
@@ -124,7 +124,7 @@ const SettingsPage = () => {
 
                 {/* Message Display */}
                 {message.text && (
-                    <div className={`mx-6 mt-6 px-4 py-3 rounded ${
+                    <div className={`mx-4 sm:mx-6 mt-4 sm:mt-6 px-4 py-3 rounded text-sm ${
                         message.type === 'success'
                             ? 'bg-green-100 border border-green-400 text-green-700'
                             : 'bg-red-100 border border-red-400 text-red-700'
@@ -134,7 +134,7 @@ const SettingsPage = () => {
                 )}
 
                 {/* Form */}
-                <form onSubmit={handleSave} className="p-6 space-y-6">
+                <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
                     {/* Company Name (Read-only) */}
                     <div>
                         <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
@@ -237,11 +237,11 @@ const SettingsPage = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
                         <button
                             type="button"
                             onClick={fetchSettings}
-                            className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="px-4 sm:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
                             disabled={saving}
                         >
                             Reset
@@ -249,7 +249,7 @@ const SettingsPage = () => {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="flex items-center px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                         >
                             <Save className="w-4 h-4 mr-2" />
                             {saving ? 'Saving...' : 'Save Settings'}

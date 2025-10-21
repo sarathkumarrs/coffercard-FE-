@@ -260,12 +260,12 @@ const CampaignsPage = () => {
     }
 
     return (
-        <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-semibold">Campaigns</h1>
+        <div className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+                <h1 className="text-xl sm:text-2xl font-semibold">Campaigns</h1>
                 <button
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm sm:text-base"
                 >
                     Create Campaign
                 </button>
@@ -279,9 +279,9 @@ const CampaignsPage = () => {
                 campaign.scheduled_for_deletion ? 'border-2 border-red-500 bg-red-50' : ''
             }`}
         >
-            <div className="flex justify-between items-center">
-                <div>
-                    <h3 className="text-lg font-medium">{campaign.name}</h3>
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+                <div className="flex-1">
+                    <h3 className="text-base sm:text-lg font-medium">{campaign.name}</h3>
                     {campaign.scheduled_for_deletion && (
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-red-600 font-semibold">
@@ -294,7 +294,7 @@ const CampaignsPage = () => {
                         </div>
                     )}
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                     {campaign.scheduled_for_deletion ? (
                         <button
                             onClick={() => handleCancelDeletion(campaign.id)}
@@ -350,13 +350,13 @@ const CampaignsPage = () => {
 </div>
 
             {selectedCampaignForQR && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
+        <div className="bg-white p-4 sm:p-6 rounded-lg max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Campaign QR Code</h2>
-                <button 
+                <h2 className="text-lg sm:text-xl font-bold">Campaign QR Code</h2>
+                <button
                     onClick={() => setSelectedCampaignForQR(null)}
-                    className="text-gray-500 hover:text-gray-700"
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
                 >
                     ×
                 </button>
@@ -368,10 +368,10 @@ const CampaignsPage = () => {
 
             {/* Create Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-6 rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
-                       <div className="flex justify-between items-center p-6 border-b">
-                        <h2 className="text-xl font-bold">Create New Campaign</h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
+                    <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
+                       <div className="flex justify-between items-center p-4 sm:p-6 border-b">
+                        <h2 className="text-lg sm:text-xl font-bold">Create New Campaign</h2>
                         <button
                             onClick={() => setIsCreateModalOpen(false)}
                             className="text-gray-500 hover:text-gray-700 text-2xl font-bold leading-none"
@@ -381,7 +381,7 @@ const CampaignsPage = () => {
                         </button>
                         </div>
 
-                        <div className="p-6 overflow-y-auto flex-1">
+                        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
                             <form onSubmit={handleCreateCampaign}>
                                 <div className="mb-4">
                                     <label className="block mb-2">Name</label>
@@ -526,13 +526,13 @@ const CampaignsPage = () => {
 
 
             {editModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
                     <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
-                        <div className="p-6 border-b">
-                            <h2 className="text-xl font-bold">Edit Campaign</h2>
+                        <div className="p-4 sm:p-6 border-b">
+                            <h2 className="text-lg sm:text-xl font-bold">Edit Campaign</h2>
                         </div>
 
-                        <div className="p-6 overflow-y-auto flex-1">
+                        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
                             <form onSubmit={handleEditCampaign}>
                                 <div className="space-y-4">
                                     <div>
@@ -677,20 +677,20 @@ const CampaignsPage = () => {
                             </form>
                         </div>
 
-                        <div className="p-6 border-t bg-gray-50">
+                        <div className="p-4 sm:p-6 border-t bg-gray-50">
                             <div className="flex justify-end gap-2">
                                 <button
                                     onClick={() => {
                                         setEditModalOpen(false);
                                         setEditingCampaign(null);
                                     }}
-                                    className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleEditCampaign}
-                                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600"
                                 >
                                     Save Changes
                                 </button>

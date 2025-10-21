@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, Phone, Settings } from 'lucide-react';
+import { AlertCircle, Phone, Settings, Menu, X } from 'lucide-react';
 
 const RenewalModal = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
@@ -106,6 +106,7 @@ const Layout = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isRenewalModalOpen, setIsRenewalModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -149,6 +150,8 @@ const Layout = ({ children }) => {
               <Link to="/dashboard" className="flex-shrink-0 text-xl font-bold text-indigo-600">
                 CofferCard
               </Link>
+
+              {/* Desktop Navigation */}
               <div className="hidden md:ml-6 md:flex md:space-x-8">
                 <Link
                   to="/dashboard"
@@ -183,7 +186,9 @@ const Layout = ({ children }) => {
                 </Link>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+
+            {/* Desktop Right Side */}
+            <div className="hidden md:flex items-center space-x-4">
               {/* Renewal Warning */}
               {shouldShowRenewalWarning() && (
                 <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
@@ -211,7 +216,100 @@ const Layout = ({ children }) => {
                 Logout
               </button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <div className="flex md:hidden items-center">
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
+              >
+                {isMobileMenuOpen ? (
+                  <X className="block h-6 w-6" />
+                ) : (
+                  <Menu className="block h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
+
+          {/* Mobile Menu */}
+          {isMobileMenuOpen && (
+            <div className="md:hidden border-t border-gray-200">
+              <div className="pt-2 pb-3 space-y-1">
+                <Link
+                  to="/dashboard"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                    isActive('/dashboard')
+                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  to="/campaigns"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                    isActive('/campaigns')
+                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  Campaigns
+                </Link>
+                <Link
+                  to="/settings"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
+                    isActive('/settings')
+                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
+                  }`}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </Link>
+              </div>
+
+              {/* Mobile User Info & Actions */}
+              <div className="pt-4 pb-3 border-t border-gray-200">
+                <div className="flex items-center px-4 mb-3">
+                  <span className="text-sm text-gray-700 font-medium">{user?.company_name}</span>
+                </div>
+
+                {/* Renewal Warning on Mobile */}
+                {shouldShowRenewalWarning() && (
+                  <div className="px-4 mb-3">
+                    <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
+                      <AlertCircle className="w-4 h-4 text-orange-600" />
+                      <span className="text-sm font-medium text-orange-700">
+                        {getDaysLeftDisplay()}
+                      </span>
+                      <button
+                        onClick={() => {
+                          setIsRenewalModalOpen(true);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className="ml-2 px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 transition-colors"
+                      >
+                        Renew
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="px-4">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">

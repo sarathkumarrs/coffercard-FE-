@@ -184,11 +184,11 @@ const PrizeModal = ({ campaign, onClose }) => {
     const remainingProbability = 100 - totalProbability;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
+            <div className="bg-white p-4 sm:p-6 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Manage Prizes - {campaign.name}</h2>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">×</button>
+                    <h2 className="text-lg sm:text-xl font-bold">Manage Prizes - {campaign.name}</h2>
+                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
                 </div>
 
                 {error && (
@@ -217,10 +217,10 @@ const PrizeModal = ({ campaign, onClose }) => {
                     ) : (
                         <div className="space-y-3">
                             {prizes.map(prize => (
-                                <div key={prize.id} className="flex items-center justify-between bg-gray-50 p-3 rounded border">
+                                <div key={prize.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 p-3 rounded border gap-3">
                                     <div className="flex-grow">
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-medium">{prize.name}</span>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-medium text-sm sm:text-base">{prize.name}</span>
                                             <span className={`text-xs px-2 py-1 rounded ${
                                                 prize.is_winning ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-800'
                                             }`}>
@@ -228,15 +228,15 @@ const PrizeModal = ({ campaign, onClose }) => {
                                             </span>
                                         </div>
                                         <div className="text-sm text-gray-600">{prize.description}</div>
-                                        <div className="text-sm mt-1">
+                                        <div className="text-xs sm:text-sm mt-1">
                                             <span className="mr-4">Probability: {prize.probability}%</span>
                                             {prize.is_winning && prize.quantity > 0 && <span>Quantity: {prize.quantity}</span>}
                                         </div>
                                     </div>
-                                    <div className="flex gap-2 ml-4">
+                                    <div className="flex gap-2 sm:ml-4">
                                         <button
                                             onClick={() => handleEditClick(prize)}
-                                            className="text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50"
+                                            className="text-blue-500 hover:text-blue-700 px-2 py-1 rounded hover:bg-blue-50 text-sm"
                                         >
                                             Edit
                                         </button>
@@ -245,7 +245,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                                                 console.log('Deleting prize with ID:', prize.id);
                                                 handleDeletePrize(prize.id);
                                             }}
-                                            className="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50"
+                                            className="text-red-500 hover:text-red-700 px-2 py-1 rounded hover:bg-red-50 text-sm"
                                         >
                                             Delete
                                         </button>
@@ -312,7 +312,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                                 required
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium mb-1">Win Probability (%)</label>
                                 <input
@@ -341,19 +341,19 @@ const PrizeModal = ({ campaign, onClose }) => {
                                 </div>
                             )}
                         </div>
-                        <div className="flex justify-end gap-2">
+                        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                             {editingPrize && (
                                 <button
                                     type="button"
                                     onClick={handleCancelEdit}
-                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400"
+                                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 text-sm sm:text-base"
                                 >
                                     Cancel
                                 </button>
                             )}
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 text-sm sm:text-base"
                                 disabled={totalProbability + parseFloat(newPrize.probability || 0) > 100}
                             >
                                 {editingPrize ? 'Update Prize' : 'Add Prize'}

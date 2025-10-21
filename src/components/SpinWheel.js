@@ -25,13 +25,18 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
         return colors[Math.floor(Math.random() * colors.length)];
     }
 
-    const handleSpinClick = async () => {
+    const handleSpinClick = async (e) => {
+        // Prevent default to avoid touch delay
+        if (e) {
+            e.preventDefault();
+        }
+
         if (!mustSpin) {
             try {
                 console.log('Sending spin request to:', `${BASE_URL}/public/campaign/${campaignCode}/spin/`);
                 console.log('Current user details:', localStorage.getItem(`current_user_${campaign.id}`));
                 console.log('Starting spin for campaign:', campaignCode);
-                
+
                 const response = await fetch(`${BASE_URL}/public/campaign/${campaignCode}/spin/`, {
                     method: 'POST',
                     headers: {
@@ -41,10 +46,10 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
                         user: localStorage.getItem(`current_user_${campaign.id}`)
                     })
                 });
-                
+
                 const data = await response.json();
                 console.log('Spin response:', data);
-                
+
                 if (data.needs_registration) {
                     // Trigger parent component to show registration
                     if (onNeedsRegistration) {
@@ -136,7 +141,12 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
                 </div>
             )}
 
-            <div className="mb-6 sm:mb-8 w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px]">
+            <div className="mb-6 sm:mb-8 w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px]"
+                 style={{
+                     transform: 'translateZ(0)',
+                     willChange: 'transform',
+                     backfaceVisibility: 'hidden'
+                 }}>
                 <Wheel
                     mustStartSpinning={mustSpin}
                     prizeNumber={prizeNumber}
@@ -150,17 +160,30 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
                     radiusLineWidth={1}
                     fontSize={window.innerWidth < 640 ? 12 : 15}
                     textDistance={60}
+                    spinDuration={0.5}
+                    perpendicularText={false}
                 />
             </div>
 
             <button
+                onTouchStart={(e) => {
+                    e.preventDefault();
+                    if (!mustSpin) {
+                        handleSpinClick(e);
+                    }
+                }}
                 onClick={handleSpinClick}
                 disabled={mustSpin}
-                className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-base sm:text-lg shadow-lg
+                className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-base sm:text-lg shadow-lg transition-transform active:scale-95
                     ${mustSpin
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-blue-500 hover:bg-blue-600 animate-pulse'
                     }`}
+                style={{
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                    userSelect: 'none'
+                }}
             >
                 {mustSpin ? 'Spinning...' : 'SPIN!'}
             </button>

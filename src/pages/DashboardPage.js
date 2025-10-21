@@ -139,9 +139,9 @@ const DashboardPage = () => {
         if (!isOpen) return null;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg p-6 max-w-md w-full">
-                    <h3 className="text-lg font-semibold mb-4">Download Claims Data - {campaignName}</h3>
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                <div className="bg-white rounded-lg p-4 sm:p-6 max-w-md w-full">
+                    <h3 className="text-base sm:text-lg font-semibold mb-4">Download Claims Data - {campaignName}</h3>
 
                     <div className="space-y-4">
                         <div>
@@ -254,33 +254,33 @@ const DashboardPage = () => {
         : 0;
 
     return (
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
             {/* Overall Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-semibold mb-2">Total Campaigns</h3>
-                    <p className="text-3xl font-bold">{campaigns.length}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Total Campaigns</h3>
+                    <p className="text-2xl sm:text-3xl font-bold">{campaigns.length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-semibold mb-2">Total Claims</h3>
-                    <p className="text-3xl font-bold">{claims.length}</p>
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Total Claims</h3>
+                    <p className="text-2xl sm:text-3xl font-bold">{claims.length}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-semibold mb-2">Active Campaigns</h3>
-                    <p className="text-3xl font-bold">{activeCampaigns}</p>
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Active Campaigns</h3>
+                    <p className="text-2xl sm:text-3xl font-bold">{activeCampaigns}</p>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-lg font-semibold mb-2">Pending Claims</h3>
-                    <p className="text-3xl font-bold">{pendingClaims}</p>
+                <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">Pending Claims</h3>
+                    <p className="text-2xl sm:text-3xl font-bold">{pendingClaims}</p>
                 </div>
             </div>
 
             {/* Campaigns List */}
-            <div className="bg-white rounded-lg shadow mb-8">
-                <div className="px-6 py-4 border-b">
-                    <h3 className="text-lg font-semibold">Active Campaigns</h3>
+            <div className="bg-white rounded-lg shadow mb-6 sm:mb-8">
+                <div className="px-4 sm:px-6 py-4 border-b">
+                    <h3 className="text-base sm:text-lg font-semibold">Active Campaigns</h3>
                 </div>
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                     {campaigns.length === 0 ? (
                         <div className="text-center text-gray-500 py-8">
                             No campaigns found. Create your first campaign to get started!
@@ -335,10 +335,10 @@ const DashboardPage = () => {
 
             {/* Claims Table with Search */}
             <div className="bg-white rounded-lg shadow">
-                <div className="px-6 py-4 border-b">
-                    <div className="flex justify-between items-center">
-                        <div className="flex items-center gap-4">
-                            <h3 className="text-lg font-semibold">
+                <div className="px-4 sm:px-6 py-4 border-b">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <h3 className="text-base sm:text-lg font-semibold">
                                 {selectedCampaign
                                     ? `Claims for: ${campaigns.find(c => c.id === selectedCampaign)?.name || 'Unknown'}`
                                     : 'Recent Claims (All Campaigns)'}
@@ -346,7 +346,7 @@ const DashboardPage = () => {
                             {selectedCampaign && (
                                 <button
                                     onClick={() => setSelectedCampaign(null)}
-                                    className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded"
+                                    className="text-xs sm:text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded self-start"
                                 >
                                     Show All Campaigns
                                 </button>
@@ -357,7 +357,7 @@ const DashboardPage = () => {
                             placeholder="Search claims..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="px-4 py-2 border rounded-lg w-64"
+                            className="px-4 py-2 border rounded-lg w-full sm:w-64"
                         />
                     </div>
                 </div>

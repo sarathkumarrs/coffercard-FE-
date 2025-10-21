@@ -316,8 +316,17 @@ const PublicCampaignPage = () => {
                             <div className="flex flex-col items-center">
                                 {!scratchPrize ? (
                                     <button
+                                        onTouchStart={(e) => {
+                                            e.preventDefault();
+                                            handleScratchStart();
+                                        }}
                                         onClick={handleScratchStart}
-                                        className="bg-blue-500 text-white px-6 py-3 rounded-full font-bold text-lg hover:bg-blue-600"
+                                        className="bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-full font-bold text-base sm:text-lg hover:bg-blue-600 transition-transform active:scale-95 shadow-lg animate-pulse"
+                                        style={{
+                                            WebkitTapHighlightColor: 'transparent',
+                                            touchAction: 'manipulation',
+                                            userSelect: 'none'
+                                        }}
                                     >
                                         Get Your Scratch Card
                                     </button>
