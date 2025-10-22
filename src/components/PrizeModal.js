@@ -178,10 +178,15 @@ const PrizeModal = ({ campaign, onClose }) => {
         }
     };
 
-    const totalProbability = prizes.reduce((sum, prize) => 
+    const totalProbability = prizes.reduce((sum, prize) =>
         sum + (parseFloat(prize.probability) || 0), 0);
-    
+
     const remainingProbability = 100 - totalProbability;
+
+    // Calculate total probability excluding the currently editing prize (for button validation)
+    const totalProbabilityExcludingEditing = prizes
+        .filter(prize => prize.id !== editingPrize)
+        .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
@@ -353,8 +358,8 @@ const PrizeModal = ({ campaign, onClose }) => {
                             )}
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 text-sm sm:text-base"
-                                disabled={totalProbability + parseFloat(newPrize.probability || 0) > 100}
+                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
+                                disabled={totalProbabilityExcludingEditing + parseFloat(newPrize.probability || 0) > 100}
                             >
                                 {editingPrize ? 'Update Prize' : 'Add Prize'}
                             </button>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const SignupForm = () => {
     const [formData, setFormData] = useState({
@@ -11,7 +12,9 @@ const SignupForm = () => {
         company_name: ''
     });
     const [error, setError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -23,7 +26,10 @@ const SignupForm = () => {
             return;
         }
 
+        setIsSubmitting(true);
+
         try {
+            // Step 1: Create the account
             const response = await fetch(`${BASE_URL}/signup/`, {
                 method: 'POST',
                 headers: {
@@ -43,10 +49,18 @@ const SignupForm = () => {
                 throw new Error(data.error || 'Signup failed');
             }
 
-            // Redirect to login page on success
-            navigate('/login', { state: { message: 'Account created successfully! Please login.' } });
+            // Step 2: Automatically log in the user
+            await login({
+                username: formData.username,
+                password: formData.password
+            });
+
+            // Step 3: Redirect to dashboard
+            navigate('/dashboard');
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -64,54 +78,54 @@ const SignupForm = () => {
                             {error}
                         </div>
                     )}
-                    <div className="rounded-md shadow-sm -space-y-px">
-                        <div className="mb-4">
+                    <div className="space-y-[10px]">
+                        <div>
                             <label htmlFor="username" className="sr-only">Username</label>
                             <input
                                 id="username"
                                 name="username"
                                 type="text"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                 placeholder="Username"
                                 value={formData.username}
                                 onChange={(e) => setFormData({...formData, username: e.target.value})}
                             />
                         </div>
-                        <div className="mb-4">
+                        <div>
                             <label htmlFor="email" className="sr-only">Email address</label>
                             <input
                                 id="email"
                                 name="email"
                                 type="email"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                 placeholder="Email address"
                                 value={formData.email}
                                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                             />
                         </div>
-                        <div className="mb-4">
+                        <div>
                             <label htmlFor="company_name" className="sr-only">Company Name</label>
                             <input
                                 id="company_name"
                                 name="company_name"
                                 type="text"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                 placeholder="Company Name"
                                 value={formData.company_name}
                                 onChange={(e) => setFormData({...formData, company_name: e.target.value})}
                             />
                         </div>
-                        <div className="mb-4">
+                        <div>
                             <label htmlFor="password" className="sr-only">Password</label>
                             <input
                                 id="password"
                                 name="password"
                                 type="password"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                 placeholder="Password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({...formData, password: e.target.value})}
@@ -124,7 +138,7 @@ const SignupForm = () => {
                                 name="confirmPassword"
                                 type="password"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                                 placeholder="Confirm Password"
                                 value={formData.confirmPassword}
                                 onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
@@ -135,9 +149,10 @@ const SignupForm = () => {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            disabled={isSubmitting}
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Sign up
+                            {isSubmitting ? 'Creating account...' : 'Sign up'}
                         </button>
                     </div>
 
