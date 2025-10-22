@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import PublicCampaignPage from './pages/PublicCampaignPage';
 import SignupForm from './components/SignupForm';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 
 const App = () => {
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupForm />} />
+            <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
             <Route path="/campaign/:code" element={<PublicCampaignPage />} />
 
             <Route element={<ProtectedRoute />}>
