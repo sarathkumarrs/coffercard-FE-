@@ -32,22 +32,34 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
 
     const guidelines = campaign.guidelines.split('\n').filter(line => line.trim());
 
+    // Check if all provided social links have been clicked
+    const hasInstagram = !!campaign.instagram_link;
+    const hasFacebook = !!campaign.facebook_link;
+
+    // Only require clicks for the social media links that are actually provided
+    const allRequiredSocialsClicked =
+        (!hasInstagram || socialClicks.instagram) &&
+        (!hasFacebook || socialClicks.facebook);
+
     return (
         <div className="min-h-screen bg-[#ffff00] py-6 sm:py-12 px-4"> {/* Bright yellow background */}
             <div className="max-w-3xl mx-auto">
-                {/* Company Logo */}
+                {/* CofferCard Logo */}
                 <div className="flex justify-center mb-6 sm:mb-8">
-                    <div className="bg-white p-3 sm:p-4 rounded-lg shadow-lg">
-                        {/* <img
-                            src={campaign.vendor.logo}
-                            alt="Company Logo"
-                            className="h-16 sm:h-20 w-auto"
-                        /> */}
-                        <img
-                            src="https://play.alusoodcargo.com/wp-content/uploads/2024/09/cropped-2.png"
-                            alt="Company Logo"
-                            className="h-16 sm:h-20 w-auto"
-                        />
+                    <div className="bg-white p-4 sm:p-6 rounded-xl shadow-2xl">
+                        <div className="flex items-center space-x-3">
+                            {/* Gift Icon */}
+                            <div className="text-4xl sm:text-5xl">🎁</div>
+                            {/* CofferCard Text */}
+                            <div>
+                                <div className="text-xl sm:text-2xl font-bold text-[#4F46E5] leading-tight">
+                                    CofferCard
+                                </div>
+                                <div className="text-[10px] sm:text-xs text-gray-500 font-medium">
+                                    Gamified Marketing
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -142,18 +154,18 @@ const SocialGuidelines = ({ campaign, onComplete }) => {
 
                     <button
                         onClick={onComplete}
-                        disabled={!socialClicks.instagram || !socialClicks.facebook}
+                        disabled={!allRequiredSocialsClicked}
                         className={`
                             w-full py-3 sm:py-4 px-4 sm:px-6 rounded-xl
                             flex items-center justify-center space-x-2
                             shadow-lg font-bold text-base sm:text-lg
                             transform transition-all duration-500
-                            ${(socialClicks.instagram && socialClicks.facebook)
+                            ${allRequiredSocialsClicked
                                 ? 'bg-[#ff1744] text-white hover:bg-[#ff1744]/90 hover:scale-105 animate-pulse'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'}
                         `}
                     >
-                        {socialClicks.instagram && socialClicks.facebook ? (
+                        {allRequiredSocialsClicked ? (
                             <span className="flex items-center">
                                 <span className="animate-bounce text-lg sm:text-xl">🎮</span>
                                 <span className="mx-2">Start Game</span>
