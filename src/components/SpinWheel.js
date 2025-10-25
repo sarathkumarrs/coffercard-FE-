@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wheel } from 'react-custom-roulette';
+import confetti from 'canvas-confetti';
 import { BASE_URL } from '../services/api';
 
 const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration }) => {
@@ -14,16 +15,55 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
         console.log('Available prizes:', prizes);
     }, [prizes]);
 
-    const data = prizes.map(prize => ({
+    // Clean, simple color palette
+    const colorPalette = [
+        { backgroundColor: '#3B82F6', textColor: '#FFFFFF' }, // Blue
+        { backgroundColor: '#EF4444', textColor: '#FFFFFF' }, // Red
+        { backgroundColor: '#10B981', textColor: '#FFFFFF' }, // Green
+        { backgroundColor: '#F59E0B', textColor: '#FFFFFF' }, // Orange
+        { backgroundColor: '#8B5CF6', textColor: '#FFFFFF' }, // Purple
+        { backgroundColor: '#EC4899', textColor: '#FFFFFF' }, // Pink
+        { backgroundColor: '#14B8A6', textColor: '#FFFFFF' }, // Teal
+        { backgroundColor: '#F97316', textColor: '#FFFFFF' }, // Orange-red
+    ];
+
+    const data = prizes.map((prize, index) => ({
         option: prize.name,
-        style: { backgroundColor: getRandomColor() }
+        style: {
+            backgroundColor: colorPalette[index % colorPalette.length].backgroundColor,
+            textColor: colorPalette[index % colorPalette.length].textColor
+        }
     }));
 
-    // Function to get random colors for wheel segments
-    function getRandomColor() {
-        const colors = ['#FF8F8F', '#91B3FA', '#88D4AB', '#FFB677', '#98B7DB'];
-        return colors[Math.floor(Math.random() * colors.length)];
-    }
+    // Confetti animation for winners
+    const triggerConfetti = () => {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+
+            confetti(Object.assign({}, defaults, {
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+            }));
+            confetti(Object.assign({}, defaults, {
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+            }));
+        }, 250);
+    };
 
     const handleSpinClick = async (e) => {
         // Prevent default to avoid touch delay
@@ -120,14 +160,15 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
     };
 
     return (
-        <div className="flex flex-col items-center px-2 sm:px-4">
+        <div className="w-full flex flex-col items-center px-4">
+            {/* Error Message */}
             {error && (
-                <div className="mb-4 p-3 sm:p-4 bg-red-100 text-red-700 rounded-lg text-sm sm:text-base w-full max-w-md">
-                    {error}
+                <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg w-full max-w-md mx-auto">
+                    <p className="font-medium">{error}</p>
                     {canShare && (
                         <button
                             onClick={handleShare}
-                            className="mt-2 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm sm:text-base"
+                            className="mt-3 w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         >
                             Share to Unlock Another Spin
                         </button>
@@ -135,58 +176,66 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
                 </div>
             )}
 
+            {/* Spins Counter */}
             {spinsLeft !== null && (
-                <div className="mb-3 sm:mb-4 text-gray-600 text-sm sm:text-base font-medium">
-                    Spins remaining: <span className="font-bold text-blue-600">{spinsLeft}</span>
+                <div className="mb-6 text-center w-full">
+                    <div className="inline-block px-6 py-2 bg-blue-500 text-white rounded-full font-semibold shadow-md">
+                        Spins Remaining: {spinsLeft}
+                    </div>
                 </div>
             )}
 
-            <div className="mb-6 sm:mb-8 w-full max-w-[280px] sm:max-w-[350px] md:max-w-[400px]"
-                 style={{
-                     transform: 'translateZ(0)',
-                     willChange: 'transform',
-                     backfaceVisibility: 'hidden'
-                 }}>
-                <Wheel
-                    mustStartSpinning={mustSpin}
-                    prizeNumber={prizeNumber}
-                    data={data}
-                    onStopSpinning={() => {
-                        setMustSpin(false);
-                        onSpinComplete(prizes[prizeNumber]);
-                        console.log('spin wheel', prizes);
-                    }}
-                    outerBorderWidth={3}
-                    radiusLineWidth={1}
-                    fontSize={window.innerWidth < 640 ? 12 : 15}
-                    textDistance={60}
-                    spinDuration={0.5}
-                    perpendicularText={false}
-                />
+            {/* Wheel Container - Mobile Optimized */}
+            <div className="w-full flex justify-center items-center mb-8">
+                <div className="relative max-w-[280px] sm:max-w-[340px] md:max-w-[400px]">
+                    <Wheel
+                        mustStartSpinning={mustSpin}
+                        prizeNumber={prizeNumber}
+                        data={data}
+                        onStopSpinning={() => {
+                            setMustSpin(false);
+                            // Trigger confetti if prize is winning
+                            if (prizes[prizeNumber].is_winning) {
+                                triggerConfetti();
+                            }
+                            onSpinComplete(prizes[prizeNumber]);
+                            console.log('spin wheel', prizes);
+                        }}
+                        outerBorderWidth={4}
+                        outerBorderColor="#1F2937"
+                        radiusLineWidth={1}
+                        radiusLineColor="#FFFFFF"
+                        fontSize={window.innerWidth < 640 ? 16 : window.innerWidth < 768 ? 18 : 20}
+                        textDistance={window.innerWidth < 640 ? 55 : window.innerWidth < 768 ? 60 : 65}
+                        spinDuration={0.6}
+                        perpendicularText={false}
+                        backgroundColors={['transparent']}
+                    />
+                </div>
             </div>
 
-            <button
-                onTouchStart={(e) => {
-                    e.preventDefault();
-                    if (!mustSpin) {
+            {/* Spin Button - Mobile Optimized */}
+            <div className="w-full flex justify-center px-0">
+                <button
+                    onClick={(e) => {
+                        e.preventDefault();
                         handleSpinClick(e);
-                    }
-                }}
-                onClick={handleSpinClick}
-                disabled={mustSpin}
-                className={`px-6 sm:px-8 py-2.5 sm:py-3 rounded-full text-white font-bold text-base sm:text-lg shadow-lg transition-transform active:scale-95
-                    ${mustSpin
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-blue-500 hover:bg-blue-600 animate-pulse'
-                    }`}
-                style={{
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                    userSelect: 'none'
-                }}
-            >
-                {mustSpin ? 'Spinning...' : 'SPIN!'}
-            </button>
+                    }}
+                    disabled={mustSpin}
+                    className={`w-full max-w-sm px-8 sm:px-12 py-4 rounded-xl text-white font-bold text-lg transition-all
+                        ${mustSpin
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-500 hover:bg-blue-600 active:scale-95 shadow-lg'
+                        }`}
+                    style={{
+                        WebkitTapHighlightColor: 'transparent',
+                        touchAction: 'manipulation',
+                        userSelect: 'none'
+                    }}
+                >
+                    {mustSpin ? 'Spinning...' : 'SPIN THE WHEEL'}
+                </button>
+            </div>
         </div>
     );
 };

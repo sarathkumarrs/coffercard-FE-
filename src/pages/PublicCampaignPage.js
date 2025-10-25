@@ -18,6 +18,7 @@ const PublicCampaignPage = () => {
     const [showSocialPage, setShowSocialPage] = useState(true);
     const [needsUserDetails, setNeedsUserDetails] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
+    const [isGettingScratchCard, setIsGettingScratchCard] = useState(false);
 
     const shouldShowSocialPage = campaign?.show_social_page && showSocialPage && isRegistered;
 
@@ -113,6 +114,9 @@ const PublicCampaignPage = () => {
     };
 
     const handleScratchStart = async () => {
+        if (isGettingScratchCard) return; // Prevent double clicks
+
+        setIsGettingScratchCard(true);
         try {
             const response = await fetch(`${BASE_URL}/public/campaign/${code}/spin/`, {
                 method: 'POST',
@@ -139,6 +143,8 @@ const PublicCampaignPage = () => {
         } catch (err) {
             console.error('Scratch error:', err);
             setError(err.message);
+        } finally {
+            setIsGettingScratchCard(false);
         }
     };
 
@@ -288,112 +294,126 @@ const PublicCampaignPage = () => {
                     onComplete={() => setShowSocialPage(false)}
                 />
             ) : (
-                <div className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 py-6 sm:py-12 px-4 pb-20">
-                    <div className="max-w-3xl mx-auto">
-                        <div className="text-center mb-6 sm:mb-8">
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 px-2">
+                <div className="min-h-screen bg-white flex flex-col">
+                    <div className="w-full mx-auto py-6 sm:py-8 pb-24">
+                        {/* Header Section */}
+                        <div className="text-center mb-8 sm:mb-10 px-4">
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
                                 {campaign.name}
                             </h1>
-                            <p className="text-sm sm:text-base text-gray-600 px-2">
+                            <p className="text-base sm:text-lg text-gray-600">
                                 {campaign.type === 'spin'
                                     ? 'Spin the wheel to win amazing prizes!'
                                     : 'Scratch to reveal your prize!'}
                             </p>
                         </div>
 
-                        {campaign.type === 'spin' ? (
-                            <SpinWheel 
-                                campaignCode={code}
-                                prizes={campaign.prizes}
-                                onSpinComplete={handleSpinComplete}
-                                campaign={campaign}
-                                onNeedsRegistration={() => {
-                                    setNeedsUserDetails(true);
-                                    setIsRegistered(false);
-                                }}
-                            />
-                        ) : (
-                            <div className="flex flex-col items-center">
-                                {!scratchPrize ? (
-                                    <button
-                                        onTouchStart={(e) => {
-                                            e.preventDefault();
-                                            handleScratchStart();
-                                        }}
-                                        onClick={handleScratchStart}
-                                        className="bg-blue-500 text-white px-6 sm:px-8 py-3 rounded-full font-bold text-base sm:text-lg hover:bg-blue-600 transition-transform active:scale-95 shadow-lg animate-pulse"
-                                        style={{
-                                            WebkitTapHighlightColor: 'transparent',
-                                            touchAction: 'manipulation',
-                                            userSelect: 'none'
-                                        }}
-                                    >
-                                        Get Your Scratch Card
-                                    </button>
-                                ) : (
-                                    <ScratchCard
-                                        campaignCode={code}
-                                        prize={scratchPrize}
-                                        onReveal={() => setWonPrize(scratchPrize)}
-                                    />
-                                )}
-                            </div>
-                        )}
+                        {/* Game Section */}
+                        <div className="w-full flex justify-center">
+                            {campaign.type === 'spin' ? (
+                                <SpinWheel
+                                    campaignCode={code}
+                                    prizes={campaign.prizes}
+                                    onSpinComplete={handleSpinComplete}
+                                    campaign={campaign}
+                                    onNeedsRegistration={() => {
+                                        setNeedsUserDetails(true);
+                                        setIsRegistered(false);
+                                    }}
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center max-w-lg mx-auto px-4">
+                                    {!scratchPrize ? (
+                                        <button
+                                            onClick={handleScratchStart}
+                                            disabled={isGettingScratchCard}
+                                            className={`w-full sm:w-auto px-8 py-4 rounded-xl text-white font-bold text-lg transition-all shadow-lg
+                                                ${isGettingScratchCard
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-blue-500 hover:bg-blue-600 active:scale-95'
+                                                }`}
+                                            style={{
+                                                WebkitTapHighlightColor: 'transparent',
+                                                touchAction: 'manipulation',
+                                                userSelect: 'none'
+                                            }}
+                                        >
+                                            {isGettingScratchCard ? 'Getting Card...' : 'Get Your Scratch Card'}
+                                        </button>
+                                    ) : (
+                                        <ScratchCard
+                                            campaignCode={code}
+                                            prize={scratchPrize}
+                                            onReveal={() => setWonPrize(scratchPrize)}
+                                        />
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
+                        {/* Prize Modal - Mobile Responsive */}
                         {wonPrize && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-                                    <h2 className="text-xl sm:text-2xl font-bold text-center mb-3 sm:mb-4">
-                                        {wonPrize.is_winning ? '🎉 Congratulations! 🎉' : '🎲 Result'}
-                                    </h2>
-                                    <p className="text-lg sm:text-xl text-center mb-4 sm:mb-6">
-                                        {wonPrize.is_winning ? (
-                                            <>You won: <span className="font-bold text-blue-600">{wonPrize.name}</span></>
-                                        ) : (
-                                            <span className="text-gray-700">{wonPrize.name}</span>
-                                        )}
-                                    </p>
-                                    <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
-                                        {wonPrize.description}
-                                    </p>
-
-                                    {wonPrize.is_winning && (
-                                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
-                                            <p className="text-sm text-blue-800 text-center">
-                                                📧 <strong>Check your email!</strong>
-                                            </p>
-                                            <p className="text-xs text-blue-600 text-center mt-2">
-                                                We've sent you an email with prize details and redemption instructions.
-                                                Please check your <strong>inbox, promotions, or spam folder</strong>.
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                                <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-sm sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
+                                    <div className="p-5 sm:p-6 md:p-8">
+                                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-3 sm:mb-4">
+                                            {wonPrize.is_winning ? '🎉 Congratulations! 🎉' : '🎲 Result'}
+                                        </h2>
+                                        <div className="text-center mb-4 sm:mb-6">
+                                            {wonPrize.is_winning && (
+                                                <p className="text-base sm:text-lg md:text-xl mb-2">
+                                                    You won:
+                                                </p>
+                                            )}
+                                            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 leading-tight">
+                                                {wonPrize.name}
                                             </p>
                                         </div>
-                                    )}
+                                        <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
+                                            {wonPrize.description}
+                                        </p>
 
-                                    <button
-                                        onClick={handlePlayAgain}
-                                        className="w-full bg-blue-500 text-white py-2.5 sm:py-3 rounded-lg hover:bg-blue-600 text-sm sm:text-base font-medium"
-                                    >
-                                        {campaign.is_in_store ? 'Next Customer' : 'Play Again'}
-                                    </button>
+                                        {wonPrize.is_winning && (
+                                            <div className="bg-blue-50 border-l-4 border-blue-500 rounded p-3 sm:p-4 mb-4 sm:mb-6">
+                                                <p className="text-sm sm:text-base text-blue-900 font-semibold mb-2">
+                                                    📧 Check your email!
+                                                </p>
+                                                <p className="text-xs sm:text-sm text-blue-700 leading-relaxed">
+                                                    We've sent you an email with prize details and redemption instructions.
+                                                    Please check your inbox, promotions, or spam folder.
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {campaign.is_in_store && (
+                                            <button
+                                                onClick={handlePlayAgain}
+                                                className="w-full bg-blue-500 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl hover:bg-blue-600 text-base sm:text-lg font-bold transition-all active:scale-95"
+                                            >
+                                                Next Customer
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
                     </div>
-                    
-                    <footer className="fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t">
-                        <div className="max-w-3xl mx-auto px-4 py-1">
-                            <div className="flex flex-col items-center justify-center">
-                                <div className="mt-1 text-xs text-gray-500">
-                                    <span>Powered by </span>
-                                    <a 
-                                        href="https://coffercard.com" 
-                                        target="_blank" 
+
+                    {/* Footer */}
+                    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+                        <div className="w-full px-4 py-3">
+                            <div className="text-center">
+                                <p className="text-xs text-gray-500">
+                                    Powered by{' '}
+                                    <a
+                                        href="https://coffercard.com"
+                                        target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-indigo-600 hover:text-indigo-700"
+                                        className="text-blue-600 hover:text-blue-700 font-medium"
                                     >
                                         coffercard.com
                                     </a>
-                                </div>
+                                </p>
                             </div>
                         </div>
                     </footer>

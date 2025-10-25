@@ -15,6 +15,7 @@
     "@tanstack/react-query": "^5.63.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.9",
+    "canvas-confetti": "^1.9.4",
     "lucide-react": "^0.471.0",
     "postcss": "^8.4.49",
     "qrcode.react": "^4.2.0",

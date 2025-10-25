@@ -63,6 +63,7 @@ const CampaignsPage = () => {
 
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingCampaign, setEditingCampaign] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Helper function to convert UTC datetime to local datetime string for datetime-local input
     const convertUTCToLocal = (utcDateString) => {
@@ -92,6 +93,9 @@ const CampaignsPage = () => {
 
     const handleEditCampaign = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // Prevent double submission
+
+        setIsSubmitting(true);
         try {
             // Clean up the data before sending
             const campaignData = {
@@ -142,6 +146,8 @@ const CampaignsPage = () => {
         } catch (error) {
             console.error('Error updating campaign:', error);
             alert(`Failed to update campaign: ${error.message}`);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -152,6 +158,9 @@ const CampaignsPage = () => {
     // Create campaign
     const handleCreateCampaign = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return; // Prevent double submission
+
+        setIsSubmitting(true);
         try {
             const { vendor, ...campaignData } = newCampaign;
 
@@ -188,6 +197,8 @@ const CampaignsPage = () => {
         } catch (err) {
             console.error('Error creating campaign:', err);
             alert(err.message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -500,14 +511,16 @@ const CampaignsPage = () => {
                                         type="button"
                                         onClick={() => setIsCreateModalOpen(false)}
                                         className="px-4 py-2 border rounded"
+                                        disabled={isSubmitting}
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
-                                        className="px-4 py-2 bg-blue-500 text-white rounded"
+                                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300 disabled:cursor-not-allowed"
+                                        disabled={isSubmitting}
                                     >
-                                        Create
+                                        {isSubmitting ? 'Creating...' : 'Create'}
                                     </button>
                                 </div>
                             </form>
@@ -685,14 +698,16 @@ const CampaignsPage = () => {
                                         setEditingCampaign(null);
                                     }}
                                     className="px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800"
+                                    disabled={isSubmitting}
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleEditCampaign}
-                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                                    disabled={isSubmitting}
                                 >
-                                    Save Changes
+                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
                                 </button>
                             </div>
                         </div>
