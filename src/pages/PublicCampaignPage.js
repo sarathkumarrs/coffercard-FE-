@@ -117,6 +117,7 @@ const PublicCampaignPage = () => {
         if (isGettingScratchCard) return; // Prevent double clicks
 
         setIsGettingScratchCard(true);
+        setError(null); // Clear any previous errors
         try {
             const response = await fetch(`${BASE_URL}/public/campaign/${code}/spin/`, {
                 method: 'POST',
@@ -132,6 +133,7 @@ const PublicCampaignPage = () => {
             if (data.needs_registration) {
                 setNeedsUserDetails(true);
                 setIsRegistered(false);
+                setIsGettingScratchCard(false);
                 return;
             }
 
@@ -323,6 +325,13 @@ const PublicCampaignPage = () => {
                                 />
                             ) : (
                                 <div className="flex flex-col items-center max-w-lg mx-auto px-4">
+                                    {/* Error Message for Scratch Card */}
+                                    {error && (
+                                        <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg w-full max-w-md mx-auto">
+                                            <p className="font-medium">{error}</p>
+                                        </div>
+                                    )}
+
                                     {!scratchPrize ? (
                                         <button
                                             onClick={handleScratchStart}
