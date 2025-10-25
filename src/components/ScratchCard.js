@@ -1,5 +1,6 @@
 // src/components/ScratchCard.js
 import React, { useRef, useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 
 const ScratchCard = ({ prize, onReveal }) => {
     const canvasRef = useRef(null);
@@ -9,6 +10,36 @@ const ScratchCard = ({ prize, onReveal }) => {
     const [lastPoint, setLastPoint] = useState(null);
     const [percentScratched, setPercentScratched] = useState(0);
     const [canvasSize, setCanvasSize] = useState({ width: 300, height: 300 });
+
+    // Confetti animation for winners
+    const triggerConfetti = () => {
+        const duration = 3000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 9999 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+
+            confetti(Object.assign({}, defaults, {
+                particleCount,
+                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+            }));
+            confetti(Object.assign({}, defaults, {
+                particleCount,
+                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+            }));
+        }, 250);
+    };
 
     // Set canvas size responsively
     useEffect(() => {
@@ -135,6 +166,12 @@ const ScratchCard = ({ prize, onReveal }) => {
 
         if (percentRevealed > 50 && !isRevealed) {
             setIsRevealed(true);
+
+            // Trigger confetti if prize is winning
+            if (prize?.is_winning) {
+                triggerConfetti();
+            }
+
             onReveal && onReveal();
         }
     };
