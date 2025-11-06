@@ -239,6 +239,17 @@ const LandingPage = () => {
                     <p className="text-xs mt-4">
                         © 2024 CofferCard. All rights reserved.
                     </p>
+                    <p className="text-xs mt-4">
+  © Owned and managed by{" "}
+  <a
+    href="https://infobuddha.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="text-blue-500 hover:underline"
+  >
+    Infobuddha Technologies
+  </a>
+</p>
                 </div>
             </footer>
         </div>
