@@ -187,7 +187,7 @@ const SpinWheel = ({campaignCode, prizes, onSpinComplete, campaign, onNeedsRegis
 
             {/* Wheel Container - Mobile Optimized */}
             <div className="w-full flex justify-center items-center mb-8">
-                <div className="relative max-w-[280px] sm:max-w-[340px] md:max-w-[400px]">
+                <div className="relative max-w-[280px] sm:max-w-[340px] md:max-w-[400px] flex justify-center items-center w-full">
                     <Wheel
                         mustStartSpinning={mustSpin}
                         prizeNumber={prizeNumber}
