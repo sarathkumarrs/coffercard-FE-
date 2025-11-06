@@ -229,18 +229,6 @@ const CampaignsPage = () => {
             // Refresh campaigns list to show the scheduled deletion
             fetchCampaigns();
 
-            // Schedule cleanup after 5 minutes
-            setTimeout(async () => {
-                try {
-                    await fetchWithAuth(`${BASE_URL}/campaigns/cleanup_deleted/`, {
-                        method: 'POST'
-                    });
-                    fetchCampaigns();
-                } catch (cleanupError) {
-                    console.error('Cleanup error:', cleanupError);
-                }
-            }, 5 * 60 * 1000); // 5 minutes
-
         } catch (error) {
             console.error('Error deleting campaign:', error);
             alert('Failed to schedule campaign for deletion');
