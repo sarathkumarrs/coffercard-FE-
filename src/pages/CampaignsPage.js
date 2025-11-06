@@ -84,8 +84,11 @@ const CampaignsPage = () => {
         try {
             const response = await fetchWithAuth(`${BASE_URL}/campaigns/`);
             const data = await response.json();
-            setCampaigns(data);
-            console.log('Campaigns:', data);
+            // Sort campaigns by ID in descending order (newest first)
+            // Create a new array to ensure React detects the change
+            const sortedData = [...data].sort((a, b) => b.id - a.id);
+            setCampaigns(sortedData);
+            console.log('Campaigns:', sortedData);
         } catch (error) {
             console.error('Error fetching campaigns:', error);
         }

@@ -59,6 +59,10 @@ const DashboardPage = () => {
                 throw new Error('Invalid response format for campaigns');
             }
 
+            // Sort campaigns by ID in descending order (newest first)
+            // Create a new array to ensure React detects the change
+            const sortedCampaigns = [...campaignsData].sort((a, b) => b.id - a.id);
+
             // Fetch all claims
             const claimsResponse = await fetchWithAuth(`${BASE_URL}/claims/`);
 
@@ -74,7 +78,7 @@ const DashboardPage = () => {
                 throw new Error('Invalid response format for claims');
             }
 
-            setCampaigns(campaignsData);
+            setCampaigns(sortedCampaigns);
             setClaims(claimsData);
         } catch (error) {
             console.error('Error fetching dashboard data:', error);
