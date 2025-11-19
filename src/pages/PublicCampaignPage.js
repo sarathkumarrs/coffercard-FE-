@@ -394,6 +394,49 @@ const PublicCampaignPage = () => {
                                             </div>
                                         )}
 
+                                        {/* Share Button */}
+                                        <button
+                                            onClick={async () => {
+                                                const shareUrl = window.location.href;
+                                                const shareText = `Check out ${campaign.name} - Spin and win amazing prizes!`;
+
+                                                if (navigator.share) {
+                                                    try {
+                                                        await navigator.share({
+                                                            title: campaign.name,
+                                                            text: shareText,
+                                                            url: shareUrl
+                                                        });
+                                                    } catch (err) {
+                                                        if (err.name !== 'AbortError') {
+                                                            console.log('Share failed:', err);
+                                                        }
+                                                    }
+                                                } else {
+                                                    // Fallback: copy to clipboard
+                                                    try {
+                                                        await navigator.clipboard.writeText(shareUrl);
+                                                        alert('Link copied to clipboard!');
+                                                    } catch (err) {
+                                                        // Final fallback
+                                                        const textArea = document.createElement('textarea');
+                                                        textArea.value = shareUrl;
+                                                        document.body.appendChild(textArea);
+                                                        textArea.select();
+                                                        document.execCommand('copy');
+                                                        document.body.removeChild(textArea);
+                                                        alert('Link copied to clipboard!');
+                                                    }
+                                                }
+                                            }}
+                                            className="w-full bg-gray-100 text-gray-700 py-2 sm:py-2.5 rounded-lg hover:bg-gray-200 text-sm sm:text-base font-medium transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                                            </svg>
+                                            Share with Friends
+                                        </button>
+
                                         {campaign.is_in_store && (
                                             <button
                                                 onClick={handlePlayAgain}
