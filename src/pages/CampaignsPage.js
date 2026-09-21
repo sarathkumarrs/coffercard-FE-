@@ -61,13 +61,12 @@ const CampaignsPage = () => {
         start_date: '',
         end_date: '',
         max_claims: 0,
+        max_spins_per_ip: 50,
         show_social_page:true,
         instagram_link:'',
         facebook_link:'',
         guidelines:'',
         is_in_store:false
-
-
     });
 
     const [editModalOpen, setEditModalOpen] = useState(false);
@@ -201,10 +200,16 @@ const CampaignsPage = () => {
             fetchCampaigns();
             setNewCampaign({
                 name: '',
-                campaign_type: 'scratch',
+                campaign_type: 'spin',
                 start_date: '',
                 end_date: '',
-                max_claims: 0
+                max_claims: 0,
+                max_spins_per_ip: 50,
+                show_social_page: true,
+                instagram_link: '',
+                facebook_link: '',
+                guidelines: '',
+                is_in_store: false
             });
         } catch (err) {
             console.error('Error creating campaign:', err);
@@ -383,6 +388,7 @@ const CampaignsPage = () => {
                 <p><strong>Start:</strong> {new Date(campaign.start_date).toLocaleDateString()}</p>
                 <p><strong>End:</strong> {new Date(campaign.end_date).toLocaleDateString()}</p>
                 <p><strong>Max Claims:</strong> {campaign.max_claims || 'Unlimited'}</p>
+                <p><strong>Max Plays / IP:</strong> <span className="font-semibold text-gray-700">{campaign.max_spins_per_ip ?? 50}</span></p>
                 {campaign.design_settings?.theme_style && (
                     <p><strong>Theme:</strong> <span className="capitalize font-medium text-gray-700">{campaign.design_settings.theme_style}</span></p>
                 )}
@@ -486,9 +492,21 @@ const CampaignsPage = () => {
                                     <input
                                         type="number"
                                         value={newCampaign.max_claims}
-                                        onChange={e => setNewCampaign({...newCampaign, max_claims: parseInt(e.target.value)})}
+                                        onChange={e => setNewCampaign({...newCampaign, max_claims: parseInt(e.target.value) || 0})}
                                         className="w-full p-2 border rounded"
                                     />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block mb-1 font-medium text-sm text-gray-700">Max Plays per IP Address</label>
+                                    <input
+                                        type="number"
+                                        value={newCampaign.max_spins_per_ip ?? 50}
+                                        onChange={e => setNewCampaign({...newCampaign, max_spins_per_ip: parseInt(e.target.value) || 0})}
+                                        className="w-full p-2 border rounded"
+                                        min="1"
+                                        max="10000"
+                                    />
+                                    <p className="text-xs text-gray-500 mt-1">Limits total plays from the same IP address to prevent abuse (Default: 50)</p>
                                 </div>
                                 <div className="mb-4">
                                     <label className="flex items-center">
@@ -642,10 +660,25 @@ const CampaignsPage = () => {
                                             value={editingCampaign.max_claims}
                                             onChange={e => setEditingCampaign({
                                                 ...editingCampaign,
-                                                max_claims: parseInt(e.target.value)
+                                                max_claims: parseInt(e.target.value) || 0
                                             })}
                                             className="w-full p-2 border rounded"
                                         />
+                                    </div>
+                                    <div>
+                                        <label className="block mb-1 font-medium text-sm text-gray-700">Max Plays per IP Address</label>
+                                        <input
+                                            type="number"
+                                            value={editingCampaign.max_spins_per_ip ?? 50}
+                                            onChange={e => setEditingCampaign({
+                                                ...editingCampaign,
+                                                max_spins_per_ip: parseInt(e.target.value) || 0
+                                            })}
+                                            className="w-full p-2 border rounded"
+                                            min="1"
+                                            max="10000"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">Limits total plays from the same IP address to prevent abuse (Default: 50)</p>
                                     </div>
                                     <div>
                                         <label className="flex items-center">

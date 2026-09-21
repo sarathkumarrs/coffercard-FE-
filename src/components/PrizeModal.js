@@ -80,13 +80,29 @@ const PrizeModal = ({ campaign, onClose }) => {
                 return;
             }
 
+            // Winning probability cannot be 100% or higher
+            if (newPrize.is_winning && newProb >= 100) {
+                setError('A winning prize cannot have 100% probability. Total winning probability must be strictly less than 100%.');
+                return;
+            }
+
+            // Calculate total winning probability excluding the prize being edited
+            const currentWinningProbability = prizes
+                .filter(prize => prize.id !== editingPrize && prize.is_winning)
+                .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
+            if (newPrize.is_winning && (currentWinningProbability + newProb >= 100)) {
+                setError(`Total winning probability cannot reach or exceed 100%. Current winning: ${currentWinningProbability.toFixed(1)}%, Adding: ${newProb}%. Total would be ${(currentWinningProbability + newProb).toFixed(1)}%. Must leave a margin for non-winning outcomes.`);
+                return;
+            }
+
             // Calculate total probability excluding the prize being edited
             const totalProbability = prizes
                 .filter(prize => prize.id !== editingPrize)
                 .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
 
             if (totalProbability + newProb > 100) {
-                setError(`Total probability cannot exceed 100%. Current: ${totalProbability}%, Adding: ${newProb}%`);
+                setError(`Total combined probability cannot exceed 100%. Current: ${totalProbability}%, Adding: ${newProb}%`);
                 return;
             }
 
@@ -142,7 +158,15 @@ const PrizeModal = ({ campaign, onClose }) => {
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 console.error('Server error:', errorData);
-                throw new Error(errorData?.detail || errorData?.message || `HTTP error! status: ${response.status}`);
+                let msg = errorData?.detail || errorData?.message;
+                if (!msg && errorData && typeof errorData === 'object') {
+                    const firstKey = Object.keys(errorData)[0];
+                    if (firstKey) {
+                        const val = errorData[firstKey];
+                        msg = Array.isArray(val) ? `${firstKey}: ${val[0]}` : String(val);
+                    }
+                }
+                throw new Error(msg || `HTTP error! status: ${response.status}`);
             }
 
             await fetchPrizes();
@@ -192,12 +216,28 @@ const PrizeModal = ({ campaign, onClose }) => {
     const totalProbability = prizes.reduce((sum, prize) =>
         sum + (parseFloat(prize.probability) || 0), 0);
 
-    const remainingProbability = 100 - totalProbability;
+    const remainingProbability = Math.max(0, 100 - totalProbability);
 
-    // Calculate total probability excluding the currently editing prize (for button validation)
+    const winningProbability = prizes
+        .filter(prize => prize.is_winning)
+        .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
+    const nonWinningProbability = prizes
+        .filter(prize => !prize.is_winning)
+        .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
+    // Calculate probabilities excluding the currently editing prize
     const totalProbabilityExcludingEditing = prizes
         .filter(prize => prize.id !== editingPrize)
         .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
+    const winningProbabilityExcludingEditing = prizes
+        .filter(prize => prize.id !== editingPrize && prize.is_winning)
+        .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
+
+    const enteredProbability = parseFloat(newPrize.probability) || 0;
+    const isExceedingTotal = totalProbabilityExcludingEditing + enteredProbability > 100;
+    const isExceedingWinning = newPrize.is_winning && (enteredProbability >= 100 || (winningProbabilityExcludingEditing + enteredProbability >= 100));
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
@@ -214,16 +254,43 @@ const PrizeModal = ({ campaign, onClose }) => {
                 )}
 
                 <div className="mb-6">
-                    <div className="bg-gray-100 p-3 rounded mb-4">
-                        <div className="flex justify-between mb-1">
-                            <span className="font-medium">Total Probability: {totalProbability.toFixed(1)}%</span>
-                            <span className="text-sm text-gray-600">Remaining: {remainingProbability.toFixed(1)}%</span>
+                    <div className="bg-gray-50 border border-gray-200 p-3.5 rounded-lg mb-4 space-y-2">
+                        <div className="flex justify-between items-center text-xs sm:text-sm">
+                            <span className="font-semibold text-gray-800">
+                                Allocated Probability: {totalProbability.toFixed(1)}% / 100%
+                            </span>
+                            <span className="text-gray-500">
+                                Remaining: <strong>{remainingProbability.toFixed(1)}%</strong>
+                            </span>
                         </div>
-                        <div className="w-full bg-gray-200 h-2 rounded">
+                        <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden flex">
                             <div 
-                                className={`h-2 rounded ${totalProbability > 100 ? 'bg-red-500' : 'bg-blue-500'}`}
-                                style={{ width: `${Math.min(totalProbability, 100)}%` }}
+                                className="h-full bg-emerald-500 transition-all duration-300"
+                                style={{ width: `${Math.min(winningProbability, 100)}%` }}
+                                title={`Winning Odds: ${winningProbability.toFixed(1)}%`}
                             ></div>
+                            <div 
+                                className="h-full bg-slate-400 transition-all duration-300"
+                                style={{ width: `${Math.min(nonWinningProbability, Math.max(0, 100 - winningProbability))}%` }}
+                                title={`Non-winning Odds: ${nonWinningProbability.toFixed(1)}%`}
+                            ></div>
+                        </div>
+                        <div className="flex flex-wrap justify-between items-center text-xs text-gray-600 gap-2 pt-1 border-t border-gray-200">
+                            <div className="flex items-center gap-3">
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                                    <span>Winning: <strong>{winningProbability.toFixed(1)}%</strong> <span className="text-amber-700 font-medium">(Must be &lt; 100%)</span></span>
+                                </span>
+                                <span className="flex items-center gap-1.5">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+                                    <span>Non-winning: <strong>{nonWinningProbability.toFixed(1)}%</strong></span>
+                                </span>
+                            </div>
+                            {winningProbability >= 99.9 && (
+                                <span className="text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                    ⚠️ Winning limit reached (&lt; 100%)
+                                </span>
+                            )}
                         </div>
                     </div>
 
@@ -335,18 +402,40 @@ const PrizeModal = ({ campaign, onClose }) => {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium mb-1">Win Probability (%)</label>
+                                <label className="block text-sm font-medium mb-1">
+                                    {newPrize.is_winning ? 'Win Probability (%)' : 'Outcome Probability (%)'}
+                                </label>
                                 <input
                                     type="number"
                                     value={newPrize.probability}
                                     onChange={e => setNewPrize({...newPrize, probability: e.target.value})}
-                                    className="w-full p-2 border rounded"
+                                    className={`w-full p-2 border rounded ${
+                                        isExceedingWinning || isExceedingTotal ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                                    }`}
                                     step="0.01"
-                                    min="0"
-                                    max="100"
+                                    min="0.01"
+                                    max={newPrize.is_winning ? "99.99" : "100"}
                                     required
                                 />
-                                <p className="text-xs text-gray-500 mt-1">Remaining: {remainingProbability.toFixed(1)}%</p>
+                                {newPrize.is_winning ? (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Max winning allowed: <strong className="text-gray-700">{Math.max(0, 99.9 - winningProbabilityExcludingEditing).toFixed(1)}%</strong> <span className="text-amber-700 font-medium">(Must be &lt; 100%)</span>
+                                    </p>
+                                ) : (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        Max unallocated: <strong className="text-gray-700">{Math.max(0, 100 - totalProbabilityExcludingEditing).toFixed(1)}%</strong>
+                                    </p>
+                                )}
+                                {isExceedingWinning && (
+                                    <p className="text-xs text-red-600 font-semibold mt-1">
+                                        ⚠️ Total winning probability cannot reach or exceed 100% (would be {(winningProbabilityExcludingEditing + enteredProbability).toFixed(1)}%). Must leave margin for losing.
+                                    </p>
+                                )}
+                                {!isExceedingWinning && isExceedingTotal && (
+                                    <p className="text-xs text-red-600 font-semibold mt-1">
+                                        ⚠️ Total combined probability cannot exceed 100% (currently {(totalProbabilityExcludingEditing + enteredProbability).toFixed(1)}%).
+                                    </p>
+                                )}
                             </div>
                             {newPrize.is_winning && (
                                 <div>
@@ -388,7 +477,13 @@ const PrizeModal = ({ campaign, onClose }) => {
                             <button
                                 type="submit"
                                 className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
-                                disabled={totalProbabilityExcludingEditing + parseFloat(newPrize.probability || 0) > 100}
+                                disabled={
+                                    !newPrize.name.trim() ||
+                                    !newPrize.probability ||
+                                    enteredProbability <= 0 ||
+                                    isExceedingTotal ||
+                                    isExceedingWinning
+                                }
                             >
                                 {editingPrize ? 'Update Prize' : 'Add Prize'}
                             </button>
