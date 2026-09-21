@@ -2,20 +2,25 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import PrizeModal from '../components/PrizeModal';
 import CampaignQR from '../components/CampaignQR';
+import CampaignIntegrationModal from '../components/CampaignIntegrationModal';
+import CampaignDesignModal from '../components/CampaignDesignModal';
 import { BASE_URL, fetchWithAuth } from '../services/api';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Palette, Sparkles } from 'lucide-react';
 
 // Countdown Timer Component
 const CountdownTimer = ({ scheduledTime, onExpire }) => {
     const [timeLeft, setTimeLeft] = useState('');
 
     useEffect(() => {
+        let expired = false;
         const updateTimer = () => {
+            if (expired) return;
             const now = new Date();
             const target = new Date(scheduledTime);
             const diff = target - now;
 
             if (diff <= 0) {
+                expired = true;
                 setTimeLeft('Deleting...');
                 if (onExpire) onExpire();
                 return;
@@ -29,7 +34,10 @@ const CountdownTimer = ({ scheduledTime, onExpire }) => {
         updateTimer();
         const interval = setInterval(updateTimer, 1000);
 
-        return () => clearInterval(interval);
+        return () => {
+            expired = true;
+            clearInterval(interval);
+        };
     }, [scheduledTime, onExpire]);
 
     return (
@@ -46,9 +54,10 @@ const CampaignsPage = () => {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [selectedCampaign, setSelectedCampaign] = useState(null);
     const [selectedCampaignForQR, setSelectedCampaignForQR] = useState(null);
+    const [selectedCampaignForDesign, setSelectedCampaignForDesign] = useState(null);
     const [newCampaign, setNewCampaign] = useState({
         name: '',
-        campaign_type: 'scratch',
+        campaign_type: 'spin',
         start_date: '',
         end_date: '',
         max_claims: 0,
@@ -274,16 +283,38 @@ const CampaignsPage = () => {
             </div>
 
             <div className="grid gap-4">
-    {campaigns.map((campaign) => (
+    {campaigns.map((campaign) => {
+        const getGameBadge = (type) => {
+            switch (type) {
+                case 'slot': return { label: 'Slot Machine', icon: '🎰', bg: 'bg-amber-50 text-amber-800 border-amber-300' };
+                case 'box': return { label: 'Mystery Box', icon: '🎁', bg: 'bg-purple-50 text-purple-800 border-purple-300' };
+                case 'scratch': return { label: 'Scratch Card', icon: '🎟️', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
+                case 'spin':
+                default: return { label: 'Spin & Win', icon: '🎡', bg: 'bg-indigo-50 text-indigo-800 border-indigo-300' };
+            }
+        };
+        const badge = getGameBadge(campaign.campaign_type);
+
+        return (
         <div
             key={campaign.id}
-            className={`bg-white p-4 rounded shadow ${
+            className={`bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all ${
                 campaign.scheduled_for_deletion ? 'border-2 border-red-500 bg-red-50' : ''
             }`}
         >
-            <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                 <div className="flex-1">
-                    <h3 className="text-base sm:text-lg font-medium">{campaign.name}</h3>
+                    <div className="flex items-center gap-2.5 flex-wrap mb-1">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900">{campaign.name}</h3>
+                        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full border ${badge.bg}`}>
+                            <span>{badge.icon}</span> {badge.label}
+                        </span>
+                        {campaign.is_in_store && (
+                            <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200">
+                                🏬 In-Store Mode
+                            </span>
+                        )}
+                    </div>
                     {campaign.scheduled_for_deletion && (
                         <div className="flex items-center gap-2 mt-1">
                             <span className="text-sm text-red-600 font-semibold">
@@ -300,7 +331,7 @@ const CampaignsPage = () => {
                     {campaign.scheduled_for_deletion ? (
                         <button
                             onClick={() => handleCancelDeletion(campaign.id)}
-                            className="bg-orange-500 text-white px-3 py-1 rounded text-sm hover:bg-orange-600"
+                            className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-orange-600"
                         >
                             Cancel Deletion
                         </button>
@@ -315,58 +346,69 @@ const CampaignsPage = () => {
                                     });
                                     setEditModalOpen(true);
                                 }}
-                                className="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600"
+                                className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
                             >
                                 Edit
                             </button>
                             <button
                                 onClick={() => handleManagePrizes(campaign)}
-                                className="bg-indigo-500 text-white px-3 py-1 rounded text-sm hover:bg-indigo-600"
+                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
                             >
-                                Manage Prizes
+                                🎁 Manage Prizes
+                            </button>
+                            <button
+                                onClick={() => setSelectedCampaignForDesign(campaign)}
+                                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-xs flex items-center gap-1"
+                            >
+                                <Palette size={14} /> Design & Branding
                             </button>
                             <button
                                 onClick={() => setSelectedCampaignForQR(campaign)}
-                                className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                                className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-xs flex items-center gap-1"
                             >
-                                Show QR
+                                🚀 Integrate & QR
                             </button>
                             <button
                                 onClick={() => handleDeleteCampaign(campaign.id)}
-                                className="text-red-500 hover:text-red-700 p-1"
+                                className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                                title="Delete Campaign"
                             >
-                                <Trash2 size={18} />
+                                <Trash2 size={16} />
                             </button>
                         </>
                     )}
                 </div>
             </div>
-            <p className="text-gray-600">Type: {campaign.campaign_type}</p>
-            <div className="mt-2">
-                <p>Start: {new Date(campaign.start_date).toLocaleDateString()}</p>
-                <p>End: {new Date(campaign.end_date).toLocaleDateString()}</p>
-                <p>Max Claims: {campaign.max_claims}</p>
+            <div className="mt-3 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
+                <p><strong>Start:</strong> {new Date(campaign.start_date).toLocaleDateString()}</p>
+                <p><strong>End:</strong> {new Date(campaign.end_date).toLocaleDateString()}</p>
+                <p><strong>Max Claims:</strong> {campaign.max_claims || 'Unlimited'}</p>
+                {campaign.design_settings?.theme_style && (
+                    <p><strong>Theme:</strong> <span className="capitalize font-medium text-gray-700">{campaign.design_settings.theme_style}</span></p>
+                )}
             </div>
         </div>
-    ))}
+        );
+    })}
 </div>
 
             {selectedCampaignForQR && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
-        <div className="bg-white p-4 sm:p-6 rounded-lg max-w-md w-full">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg sm:text-xl font-bold">Campaign QR Code</h2>
-                <button
-                    onClick={() => setSelectedCampaignForQR(null)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
-                >
-                    ×
-                </button>
-            </div>
-            <CampaignQR url={selectedCampaignForQR.public_url} />
-        </div>
-    </div>
-)}
+                <CampaignIntegrationModal
+                    campaign={selectedCampaignForQR}
+                    onClose={() => setSelectedCampaignForQR(null)}
+                />
+            )}
+
+            {selectedCampaignForDesign && (
+                <CampaignDesignModal
+                    campaign={selectedCampaignForDesign}
+                    onClose={() => setSelectedCampaignForDesign(null)}
+                    onUpdated={() => {
+                        fetchCampaigns();
+                        setSelectedCampaignForDesign(null);
+                    }}
+                />
+            )}
 
             {/* Create Modal */}
             {isCreateModalOpen && (
@@ -395,14 +437,16 @@ const CampaignsPage = () => {
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label className="block mb-2">Type</label>
+                                    <label className="block mb-2 font-medium">Game Type</label>
                                     <select
                                         value={newCampaign.campaign_type}
                                         onChange={e => setNewCampaign({...newCampaign, campaign_type: e.target.value})}
-                                        className="w-full p-2 border rounded"
+                                        className="w-full p-2.5 border rounded-lg font-medium text-gray-800"
                                     >
-                                        <option value="scratch">Scratch Card</option>
-                                        <option value="spin">Spin and Win</option>
+                                        <option value="spin">🎡 Spin and Win (Lucky Wheel)</option>
+                                        <option value="scratch">🎟️ Scratch Card (Instant Scratch Off)</option>
+                                        <option value="slot">🎰 Slot Machine (3-Reel Jackpot)</option>
+                                        <option value="box">🎁 Mystery Gift Box (Tap to Unbox)</option>
                                     </select>
                                 </div>
                                 <div className="mb-4">
@@ -552,17 +596,19 @@ const CampaignsPage = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block mb-2">Type</label>
+                                        <label className="block mb-2 font-medium">Game Type</label>
                                         <select
                                             value={editingCampaign.campaign_type}
                                             onChange={e => setEditingCampaign({
                                                 ...editingCampaign,
                                                 campaign_type: e.target.value
                                             })}
-                                            className="w-full p-2 border rounded"
+                                            className="w-full p-2.5 border rounded-lg font-medium text-gray-800"
                                         >
-                                            <option value="scratch">Scratch Card</option>
-                                            <option value="spin">Spin and Win</option>
+                                            <option value="spin">🎡 Spin and Win (Lucky Wheel)</option>
+                                            <option value="scratch">🎟️ Scratch Card (Instant Scratch Off)</option>
+                                            <option value="slot">🎰 Slot Machine (3-Reel Jackpot)</option>
+                                            <option value="box">🎁 Mystery Gift Box (Tap to Unbox)</option>
                                         </select>
                                     </div>
                                     <div>

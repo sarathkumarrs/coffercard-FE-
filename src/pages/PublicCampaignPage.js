@@ -2,10 +2,111 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import SpinWheel from '../components/SpinWheel';
-import { BASE_URL } from '../services/api';
 import ScratchCard from '../components/ScratchCard';
+import SlotMachine from '../components/SlotMachine';
+import MysteryBox from '../components/MysteryBox';
+import { BASE_URL } from '../services/api';
 import SocialGuidelines from '../components/SocialGuidelines';
 import UserRegistrationModal from '../components/UserRegistrationModal';
+import { soundManager } from '../utils/soundEffects';
+import { Volume2, VolumeX, Sparkles, Trophy, ExternalLink, Copy, Check, Gift, Store } from 'lucide-react';
+
+const RECENT_WINNERS = [
+    { name: 'Alex M.', prize: '25% OFF Voucher', time: '2m ago' },
+    { name: 'Sarah K.', prize: 'VIP Gift Card', time: '4m ago' },
+    { name: 'David L.', prize: 'Mystery Gift Box', time: '6m ago' },
+    { name: 'Elena R.', prize: '10% Discount Code', time: '8m ago' },
+    { name: 'Michael T.', prize: 'Free Shipping Code', time: '11m ago' },
+];
+
+const THEMES = [
+    // ☀️ CLEAN LIGHT PRESETS
+    {
+        id: 'modern',
+        category: 'light',
+        name: 'Studio Minimalist',
+        primary: '#2563EB',
+        secondary: '#F59E0B',
+        bgHex: '#FFFFFF',
+        bgClass: 'bg-white text-slate-900',
+    },
+    {
+        id: 'emerald',
+        category: 'light',
+        name: 'Nordic Botanical',
+        primary: '#059669',
+        secondary: '#D97706',
+        bgHex: '#F0FDF4',
+        bgClass: 'bg-[#F0FDF4] text-slate-900',
+    },
+    {
+        id: 'sunset',
+        category: 'light',
+        name: 'Sunset Rose',
+        primary: '#E11D48',
+        secondary: '#F59E0B',
+        bgHex: '#FFF1F2',
+        bgClass: 'bg-[#FFF1F2] text-slate-900',
+    },
+    {
+        id: 'champagne',
+        category: 'light',
+        name: 'Champagne Alabaster',
+        primary: '#B45309',
+        secondary: '#F59E0B',
+        bgHex: '#FAF8F5',
+        bgClass: 'bg-[#FAF8F5] text-stone-900',
+    },
+
+    // 🌙 LUXURY DARK PRESETS
+    {
+        id: 'luxury',
+        category: 'dark',
+        name: 'Obsidian 24K Gold',
+        primary: '#F59E0B',
+        secondary: '#FCD34D',
+        bgHex: '#090A0F',
+        bgClass: 'bg-[#090A0F] text-white',
+    },
+    {
+        id: 'midnight',
+        category: 'dark',
+        name: 'Midnight Executive',
+        primary: '#6366F1',
+        secondary: '#38BDF8',
+        bgHex: '#0B0F19',
+        bgClass: 'bg-[#0B0F19] text-white',
+    },
+    {
+        id: 'cyberpunk',
+        category: 'dark',
+        name: 'Cyberpunk Neon',
+        primary: '#D946EF',
+        secondary: '#06B6D4',
+        bgHex: '#0D051D',
+        bgClass: 'bg-[#0D051D] text-white',
+    },
+    {
+        id: 'stealth',
+        category: 'dark',
+        name: 'Stealth Onyx',
+        primary: '#FFFFFF',
+        secondary: '#94A3B8',
+        bgHex: '#000000',
+        bgClass: 'bg-black text-white',
+    }
+];
+
+const isColorLight = (hexColor) => {
+    if (!hexColor || typeof hexColor !== 'string') return false;
+    const hex = hexColor.replace('#', '');
+    if (hex.length !== 6 && hex.length !== 3) return false;
+    const r = parseInt(hex.length === 3 ? hex[0] + hex[0] : hex.substring(0, 2), 16);
+    const g = parseInt(hex.length === 3 ? hex[1] + hex[1] : hex.substring(2, 4), 16);
+    const b = parseInt(hex.length === 3 ? hex[2] + hex[2] : hex.substring(4, 6), 16);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.6;
+};
 
 const PublicCampaignPage = () => {
     const { code } = useParams();
@@ -19,18 +120,39 @@ const PublicCampaignPage = () => {
     const [needsUserDetails, setNeedsUserDetails] = useState(false);
     const [isRegistered, setIsRegistered] = useState(false);
     const [isGettingScratchCard, setIsGettingScratchCard] = useState(false);
+    const [claimedReward, setClaimedReward] = useState(null);
+    const [copiedCode, setCopiedCode] = useState(false);
+    const [showInStoreBarcode, setShowInStoreBarcode] = useState(false);
+    const [isMuted, setIsMuted] = useState(soundManager.isMuted());
+    const [recentWinnerIndex, setRecentWinnerIndex] = useState(0);
 
     const shouldShowSocialPage = campaign?.show_social_page && showSocialPage && isRegistered;
+    const isEmbed = new URLSearchParams(window.location.search).get('embed') === 'true';
+
+    useEffect(() => {
+        const ticker = setInterval(() => {
+            setRecentWinnerIndex(prev => (prev + 1) % RECENT_WINNERS.length);
+        }, 4000);
+        return () => clearInterval(ticker);
+    }, []);
 
     useEffect(() => {
         const fetchCampaign = async () => {
             try {
                 const response = await fetch(`${BASE_URL}/public/campaign/${code}/`);
-                const data = await response.json();
+                let data;
+                try {
+                    data = await response.json();
+                } catch (jsonErr) {
+                    if (!response.ok) {
+                        throw new Error(`Server error (${response.status}). Please check backend status.`);
+                    }
+                    throw jsonErr;
+                }
 
                 // Handle campaign status (not started or ended)
                 if (!response.ok) {
-                    if (data.status === 'not_started' || data.status === 'ended') {
+                    if (data && (data.status === 'not_started' || data.status === 'ended')) {
                         setCampaignStatus({
                             status: data.status,
                             message: data.message,
@@ -41,7 +163,7 @@ const PublicCampaignPage = () => {
                         setLoading(false);
                         return;
                     }
-                    throw new Error(data.message || 'Campaign not found');
+                    throw new Error((data && data.message) || (data && data.error) || 'Campaign not found');
                 }
 
                 setCampaign(data.campaign);
@@ -55,6 +177,14 @@ const PublicCampaignPage = () => {
                     setIsRegistered(false);
                 } else {
                     setIsRegistered(true);
+                }
+
+                // Restore active claimed reward if user previously won
+                const savedReward = localStorage.getItem(`claimed_reward_${data.campaign.id}`);
+                if (savedReward) {
+                    try {
+                        setClaimedReward(JSON.parse(savedReward));
+                    } catch (e) {}
                 }
             } catch (err) {
                 setError(err.message);
@@ -81,7 +211,15 @@ const PublicCampaignPage = () => {
     
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || 'Registration failed');
+                let errorMsg = errorData.error || errorData.detail || errorData.message;
+                if (!errorMsg && typeof errorData === 'object') {
+                    const firstKey = Object.keys(errorData)[0];
+                    if (firstKey) {
+                        const val = errorData[firstKey];
+                        errorMsg = Array.isArray(val) ? `${firstKey}: ${val[0]}` : String(val);
+                    }
+                }
+                throw new Error(errorMsg || 'Registration failed');
             }
     
             // Only store in localStorage if not in-store
@@ -102,6 +240,12 @@ const PublicCampaignPage = () => {
 
     const handleSpinComplete = (prize) => {
         setWonPrize(prize);
+        if (prize && prize.is_winning) {
+            setClaimedReward(prize);
+            if (!campaign?.is_in_store) {
+                localStorage.setItem(`claimed_reward_${campaign.id}`, JSON.stringify(prize));
+            }
+        }
         if (campaign.is_in_store) {
             // Reset for next customer in in-store mode
             localStorage.removeItem(`current_user_${campaign.id}`);
@@ -256,12 +400,79 @@ const PublicCampaignPage = () => {
 
     // Generate dynamic meta description
     const metaTitle = `${campaign.name} - Win Amazing Prizes!`;
-    const metaDescription = campaign.campaign_type === 'spin'
+    const metaDescription = campaign.type === 'spin'
         ? `Spin the wheel and win amazing prizes in ${campaign.name}! Join now for a chance to win exclusive rewards.`
-        : `Scratch and reveal your prize in ${campaign.name}! Play now and win exciting rewards.`;
+        : campaign.type === 'slot'
+        ? `Pull the lever and hit the jackpot in ${campaign.name}! Win exclusive discounts and prizes.`
+        : campaign.type === 'box'
+        ? `Open a lucky mystery gift box in ${campaign.name} for an instant surprise!`
+        : `Scratch the card to reveal your secret reward in ${campaign.name}!`;
     const campaignUrl = `${window.location.origin}/campaign/${code}`;
 
-    // Render logic with proper state checks
+    // Custom Design & Branding Configuration
+    const design = campaign.design_settings || {};
+    const primaryColor = design.primary_color || '#4f46e5';
+    const secondaryColor = design.secondary_color || '#f59e0b';
+    const bgStyle = design.bg_style || 'theme_default';
+    const bgSolidColor = design.bg_solid_color || '#0f172a';
+    const bgImageUrl = design.bg_image_url || '';
+    const fontFamily = design.font_family || 'sans';
+    const logoUrl = design.logo_url || campaign.vendor_logo;
+    const logoSize = design.logo_size || 'md';
+    const badgeText = design.badge_text || (campaign.vendor_name ? `${campaign.vendor_name} Presents` : 'VIP Reward');
+    const cardStyle = design.card_style || 'glass';
+
+    const fontClass = 
+        fontFamily === 'serif' ? 'font-brand-serif' :
+        fontFamily === 'display' ? 'font-brand-display' :
+        fontFamily === 'outfit' ? 'font-brand-outfit' : 'font-brand-sans';
+
+    const currentTheme = THEMES.find(t => t.id === (design.theme_style || 'modern')) || THEMES[0];
+    const isLightMode = 
+        bgStyle === 'mesh_light' ||
+        (bgStyle === 'theme_default' && currentTheme.category === 'light') ||
+        (bgStyle === 'custom_solid' && isColorLight(bgSolidColor));
+
+    const getBgConfig = () => {
+        if (bgStyle === 'custom_solid') {
+            return {
+                className: `min-h-screen flex flex-col transition-colors duration-300 ${isLightMode ? 'text-slate-900' : 'text-white'} ${fontClass}`,
+                style: { backgroundColor: bgSolidColor }
+            };
+        }
+        if (bgStyle === 'custom_image' && bgImageUrl) {
+            return {
+                className: `min-h-screen flex flex-col transition-colors duration-300 text-white ${fontClass}`,
+                style: {
+                    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(${bgImageUrl})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    backgroundAttachment: 'fixed',
+                    backgroundColor: '#0F172A'
+                }
+            };
+        }
+        if (bgStyle === 'mesh_dark') {
+            return {
+                className: `min-h-screen flex flex-col transition-colors duration-300 bg-mesh-aurora text-white ${fontClass}`,
+                style: { backgroundColor: '#07090E' }
+            };
+        }
+        if (bgStyle === 'mesh_light') {
+            return {
+                className: `min-h-screen flex flex-col transition-colors duration-300 bg-mesh-light text-slate-900 ${fontClass}`,
+                style: { backgroundColor: '#FFFFFF' }
+            };
+        }
+        // Default theme gradients with guaranteed solid base
+        return {
+            className: `min-h-screen flex flex-col transition-colors duration-300 ${currentTheme.bgClass} ${fontClass}`,
+            style: { backgroundColor: currentTheme.bgHex }
+        };
+    };
+
+    const bgConfig = getBgConfig();
+
     return (
         <>
             <Helmet>
@@ -296,23 +507,106 @@ const PublicCampaignPage = () => {
                     onComplete={() => setShowSocialPage(false)}
                 />
             ) : (
-                <div className="min-h-screen bg-white flex flex-col">
-                    <div className="w-full mx-auto py-6 sm:py-8 pb-24">
-                        {/* Header Section */}
-                        <div className="text-center mb-8 sm:mb-10 px-4">
-                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                                {campaign.name}
+                <div className={bgConfig.className} style={bgConfig.style}>
+                    {/* Sound Effects Floating Button */}
+                    <button
+                        onClick={() => {
+                            const nextMuted = soundManager.toggleMute();
+                            setIsMuted(nextMuted);
+                        }}
+                        className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full bg-white/90 hover:bg-white text-gray-800 shadow-md border border-gray-200/80 backdrop-blur-md transition-all active:scale-95 flex items-center gap-1.5 text-xs font-bold"
+                        title={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+                    >
+                        {isMuted ? <VolumeX size={15} className="text-rose-500" /> : <Volume2 size={15} className="text-emerald-600 animate-pulse" />}
+                        <span className="text-[11px] uppercase tracking-wider hidden sm:inline">{isMuted ? 'Muted' : 'Sound'}</span>
+                    </button>
+
+                    <div className={`w-full max-w-4xl mx-auto py-6 sm:py-10 px-4 ${isEmbed ? 'pb-6' : 'pb-28'}`}>
+                        
+                        {/* Vendor Logo & Branding Header */}
+                        <div className="text-center mb-6 sm:mb-8">
+                            {logoUrl && (
+                                <div className="mb-3 flex justify-center">
+                                    <img 
+                                        src={logoUrl} 
+                                        alt={campaign.vendor_name || 'Brand Logo'} 
+                                        className={`w-auto object-contain rounded-xl drop-shadow-md transition-all ${
+                                            logoSize === 'sm' ? 'h-8 sm:h-9' : logoSize === 'lg' ? 'h-14 sm:h-16' : 'h-11 sm:h-12'
+                                        }`}
+                                    />
+                                </div>
+                            )}
+
+                            {badgeText && (
+                                <div className="flex justify-center mb-2">
+                                    <span 
+                                        style={{ 
+                                            borderColor: isLightMode ? primaryColor + '40' : primaryColor + '50', 
+                                            color: primaryColor,
+                                            backgroundColor: isLightMode ? primaryColor + '10' : primaryColor + '15'
+                                        }}
+                                        className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black uppercase tracking-widest px-3.5 py-1 rounded-full border backdrop-blur-md shadow-xs"
+                                    >
+                                        <Sparkles size={13} style={{ color: secondaryColor }} />
+                                        {badgeText}
+                                    </span>
+                                </div>
+                            )}
+
+                            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight mb-2 sm:mb-3">
+                                {campaign.design_settings?.headline || campaign.name}
                             </h1>
-                            <p className="text-base sm:text-lg text-gray-600">
-                                {campaign.type === 'spin'
-                                    ? 'Spin the wheel to win amazing prizes!'
-                                    : 'Scratch to reveal your prize!'}
+                            
+                            <p className="text-sm sm:text-base md:text-lg opacity-85 max-w-xl mx-auto leading-relaxed">
+                                {campaign.design_settings?.subheadline || (
+                                    campaign.type === 'spin'
+                                        ? 'Spin the lucky wheel for instant discounts, store credit, and prizes!'
+                                        : campaign.type === 'slot'
+                                        ? 'Pull the lever and line up the jackpot reels to win exclusive rewards!'
+                                        : campaign.type === 'box'
+                                        ? 'Select a mystery lucky gift box to reveal your instant surprise!'
+                                        : 'Scratch the card to uncover your secret discount code!'
+                                )}
                             </p>
+
+                            {/* Live Winner Social Proof Ticker */}
+                            <div className="flex justify-center mt-4">
+                                <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full shadow-xs border backdrop-blur-xs text-[11px] font-medium transition-all duration-300 ${
+                                    isLightMode 
+                                        ? 'bg-white/95 border-slate-200 text-slate-900' 
+                                        : 'bg-slate-900/90 border-white/10 text-white'
+                                }`}>
+                                    <span className="flex h-2 w-2 relative">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                    </span>
+                                    <span className={`font-bold ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+                                        {RECENT_WINNERS[recentWinnerIndex].name}
+                                    </span>
+                                    <span className={isLightMode ? 'text-slate-500' : 'text-gray-400'}>won</span>
+                                    <span className="font-black" style={{ color: primaryColor }}>
+                                        {RECENT_WINNERS[recentWinnerIndex].prize}
+                                    </span>
+                                    <span className={`text-[10px] ${isLightMode ? 'text-slate-400' : 'text-gray-400'}`}>
+                                        • {RECENT_WINNERS[recentWinnerIndex].time}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Game Section */}
-                        <div className="w-full flex justify-center">
-                            {campaign.type === 'spin' ? (
+                        {/* Interactive Games Stage with Ambient Spotlight */}
+                        <div className="relative w-full flex justify-center py-2">
+                            
+                            {/* Ambient Stage Spotlight matching brand colors */}
+                            <div 
+                                style={{
+                                    background: `radial-gradient(circle, ${primaryColor}25 0%, ${secondaryColor}15 45%, transparent 70%)`
+                                }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[340px] sm:w-[580px] h-[340px] sm:h-[580px] rounded-full blur-3xl pointer-events-none"
+                            />
+
+                            {/* 1. SPIN WHEEL (Default & for 'spin') */}
+                            {(campaign.type === 'spin' || (campaign.type !== 'slot' && campaign.type !== 'box' && campaign.type !== 'scratch')) && (
                                 <SpinWheel
                                     campaignCode={code}
                                     prizes={campaign.prizes}
@@ -323,9 +617,39 @@ const PublicCampaignPage = () => {
                                         setIsRegistered(false);
                                     }}
                                 />
-                            ) : (
-                                <div className="flex flex-col items-center max-w-lg mx-auto px-4">
-                                    {/* Error Message for Scratch Card */}
+                            )}
+
+                            {/* 2. SLOT MACHINE */}
+                            {campaign.type === 'slot' && (
+                                <SlotMachine
+                                    campaignCode={code}
+                                    prizes={campaign.prizes}
+                                    onSpinComplete={handleSpinComplete}
+                                    campaign={campaign}
+                                    onNeedsRegistration={() => {
+                                        setNeedsUserDetails(true);
+                                        setIsRegistered(false);
+                                    }}
+                                />
+                            )}
+
+                            {/* 3. MYSTERY GIFT BOX */}
+                            {campaign.type === 'box' && (
+                                <MysteryBox
+                                    campaignCode={code}
+                                    prizes={campaign.prizes}
+                                    onSpinComplete={handleSpinComplete}
+                                    campaign={campaign}
+                                    onNeedsRegistration={() => {
+                                        setNeedsUserDetails(true);
+                                        setIsRegistered(false);
+                                    }}
+                                />
+                            )}
+
+                            {/* 6. SCRATCH CARD */}
+                            {campaign.type === 'scratch' && (
+                                <div className="flex flex-col items-center max-w-lg mx-auto px-4 w-full">
                                     {error && (
                                         <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg w-full max-w-md mx-auto">
                                             <p className="font-medium">{error}</p>
@@ -336,69 +660,157 @@ const PublicCampaignPage = () => {
                                         <button
                                             onClick={handleScratchStart}
                                             disabled={isGettingScratchCard}
-                                            className={`w-full sm:w-auto px-8 py-4 rounded-xl text-white font-bold text-lg transition-all shadow-lg
-                                                ${isGettingScratchCard
+                                            className={`w-full sm:w-auto px-10 py-4 rounded-2xl text-white font-black text-lg transition-all shadow-xl active:scale-95 ${
+                                                isGettingScratchCard
                                                     ? 'bg-gray-400 cursor-not-allowed'
-                                                    : 'bg-blue-500 hover:bg-blue-600 active:scale-95'
-                                                }`}
-                                            style={{
-                                                WebkitTapHighlightColor: 'transparent',
-                                                touchAction: 'manipulation',
-                                                userSelect: 'none'
-                                            }}
+                                                    : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                                            }`}
                                         >
-                                            {isGettingScratchCard ? 'Getting Card...' : 'Get Your Scratch Card'}
+                                            {isGettingScratchCard ? '✨ Preparing Card...' : '🎟️ Scratch Card Now'}
                                         </button>
                                     ) : (
                                         <ScratchCard
                                             campaignCode={code}
                                             prize={scratchPrize}
-                                            onReveal={() => setWonPrize(scratchPrize)}
+                                            onReveal={() => handleSpinComplete(scratchPrize)}
                                         />
                                     )}
                                 </div>
                             )}
                         </div>
 
-                        {/* Prize Modal - Mobile Responsive */}
+                        {/* Interactive Celebration & Voucher Redemption Modal */}
                         {wonPrize && (
-                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-                                <div className="bg-white rounded-xl sm:rounded-2xl w-full max-w-sm sm:max-w-md max-h-[85vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
-                                    <div className="p-5 sm:p-6 md:p-8">
-                                        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-3 sm:mb-4">
-                                            {wonPrize.is_winning ? '🎉 Congratulations! 🎉' : '🎲 Result'}
-                                        </h2>
-                                        <div className="text-center mb-4 sm:mb-6">
-                                            {wonPrize.is_winning && (
-                                                <p className="text-base sm:text-lg md:text-xl mb-2">
-                                                    You won:
-                                                </p>
-                                            )}
-                                            <p className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 leading-tight">
-                                                {wonPrize.name}
+                            <div className="fixed inset-0 bg-black/75 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+                                
+                                {/* Rotating Golden Sunburst Rays */}
+                                {wonPrize.is_winning && (
+                                    <div className="absolute w-[500px] sm:w-[650px] h-[500px] sm:h-[650px] bg-[radial-gradient(circle,rgba(251,191,36,0.4)_0%,transparent_70%)] animate-spin-slow pointer-events-none z-0"></div>
+                                )}
+
+                                <div className="bg-white rounded-3xl w-full max-w-md max-h-[92vh] overflow-y-auto shadow-2xl border-2 border-amber-400/40 relative z-10 animate-in zoom-in-95 duration-200">
+                                    
+                                    {/* Close Button */}
+                                    <button
+                                        onClick={() => setWonPrize(null)}
+                                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center font-bold text-base transition-colors z-20"
+                                        aria-label="Close"
+                                    >
+                                        ✕
+                                    </button>
+
+                                    <div className="p-6 sm:p-8">
+                                        <div className="text-center mb-4">
+                                            <span className="text-5xl sm:text-6xl inline-block mb-2 animate-bounce">
+                                                {wonPrize.is_winning ? '🎉' : '🎲'}
+                                            </span>
+                                            <h2 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                                                {wonPrize.is_winning ? 'YOU WON!' : 'Good Try!'}
+                                            </h2>
+                                            <p className="text-xs font-black text-amber-600 uppercase tracking-widest mt-1">
+                                                {wonPrize.is_winning ? '★ Verified Reward Unlocked ★' : 'Result Recorded'}
                                             </p>
                                         </div>
-                                        <p className="text-sm sm:text-base text-gray-600 text-center mb-4 sm:mb-6">
-                                            {wonPrize.description}
-                                        </p>
 
-                                        {wonPrize.is_winning && (
-                                            <div className="bg-blue-50 border-l-4 border-blue-500 rounded p-3 sm:p-4 mb-4 sm:mb-6">
-                                                <p className="text-sm sm:text-base text-blue-900 font-semibold mb-2">
-                                                    📧 Check your email!
+                                        {/* Prize Banner */}
+                                        <div className="bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 p-4 rounded-2xl border border-amber-200 text-center mb-5 shadow-xs">
+                                            <p className="text-xl sm:text-2xl font-black text-amber-950 leading-tight">
+                                                {wonPrize.name}
+                                            </p>
+                                            {wonPrize.description && (
+                                                <p className="text-xs sm:text-sm text-amber-800/80 mt-1 leading-relaxed">
+                                                    {wonPrize.description}
                                                 </p>
-                                                <p className="text-xs sm:text-sm text-blue-700 leading-relaxed">
-                                                    We've sent you an email with prize details and redemption instructions.
-                                                    Please check your inbox, promotions, or spam folder.
+                                            )}
+                                        </div>
+
+                                        {/* PERFORATED GOLDEN VOUCHER CARD FOR WINNING PRIZES */}
+                                        {wonPrize.is_winning && (
+                                            <div className="space-y-4 mb-6">
+                                                
+                                                {/* Voucher Ticket with Notched Edges */}
+                                                <div className="relative bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 p-0.5 rounded-2xl shadow-xl overflow-hidden">
+                                                    <div className="bg-slate-950 rounded-[14px] p-5 relative overflow-hidden text-white">
+                                                        
+                                                        {/* Left and Right Perforated Notches */}
+                                                        <div className="absolute -left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white z-10 border-r border-amber-300/40"></div>
+                                                        <div className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white z-10 border-l border-amber-300/40"></div>
+
+                                                        <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-amber-300 font-bold mb-2">
+                                                            <span>OFFICIAL VOUCHER</span>
+                                                            <span>100% VALID</span>
+                                                        </div>
+
+                                                        <div className="flex items-center justify-between gap-3 pt-1">
+                                                            <span className="font-mono text-xl sm:text-2xl font-black text-amber-400 tracking-wider">
+                                                                {wonPrize.coupon_code || `WIN-${wonPrize.id || 'OFF'}`}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const codeToCopy = wonPrize.coupon_code || `WIN-${wonPrize.id || 'OFF'}`;
+                                                                    navigator.clipboard.writeText(codeToCopy);
+                                                                    setCopiedCode(true);
+                                                                    setTimeout(() => setCopiedCode(false), 2500);
+                                                                }}
+                                                                className={`px-4 py-2 rounded-xl font-black text-xs transition-all flex items-center gap-1.5 active:scale-95 shadow-md ${
+                                                                    copiedCode
+                                                                        ? 'bg-emerald-500 text-white'
+                                                                        : 'bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 hover:brightness-110'
+                                                                }`}
+                                                            >
+                                                                {copiedCode ? <Check size={14} /> : <Copy size={14} />}
+                                                                {copiedCode ? 'COPIED!' : 'COPY CODE'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Action 1: Redeem & Shop Now Button with Dynamic Brand Gradient */}
+                                                {(campaign.design_settings?.store_url || wonPrize.store_url) && (
+                                                    <a
+                                                        href={campaign.design_settings?.store_url || wonPrize.store_url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        style={{
+                                                            background: `linear-gradient(135deg, ${primaryColor}, ${secondaryColor})`
+                                                        }}
+                                                        className="w-full py-4 text-white font-black text-base rounded-2xl shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 text-center tracking-wide ring-4 ring-white/20 hover:brightness-105"
+                                                    >
+                                                        🛍️ {campaign.design_settings?.cta_text || 'Redeem & Shop Now'} ↗
+                                                    </a>
+                                                )}
+
+                                                {/* Action 2: In-Store Barcode Toggle */}
+                                                <button
+                                                    onClick={() => setShowInStoreBarcode(!showInStoreBarcode)}
+                                                    className="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                                                >
+                                                    {showInStoreBarcode ? '▲ Hide Cashier Voucher' : '🏪 Show In-Store Barcode'}
+                                                </button>
+
+                                                {showInStoreBarcode && (
+                                                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center animate-in fade-in">
+                                                        <p className="text-[11px] text-gray-500 mb-2">Show this barcode at store counter to redeem:</p>
+                                                        <div className="font-mono text-xl tracking-widest font-black text-slate-800 bg-white py-2 px-4 rounded border border-gray-300 inline-block mb-1">
+                                                            ||| | || |||| | |||
+                                                        </div>
+                                                        <p className="text-xs font-mono font-bold text-gray-700">
+                                                            {wonPrize.coupon_code || `CC-${campaign.id}-${wonPrize.id}`}
+                                                        </p>
+                                                    </div>
+                                                )}
+
+                                                <p className="text-[11px] text-gray-400 text-center leading-relaxed">
+                                                    📧 Your voucher code is permanently saved below and ready to redeem anytime.
                                                 </p>
                                             </div>
                                         )}
 
-                                        {/* Share Button */}
+                                        {/* Share Button to Unlock Spins */}
                                         <button
                                             onClick={async () => {
                                                 const shareUrl = window.location.href;
-                                                const shareText = `Check out ${campaign.name} - Spin and win amazing prizes!`;
+                                                const shareText = `Check out ${campaign.name} - Play and win amazing rewards!`;
 
                                                 if (navigator.share) {
                                                     try {
@@ -407,40 +819,21 @@ const PublicCampaignPage = () => {
                                                             text: shareText,
                                                             url: shareUrl
                                                         });
-                                                    } catch (err) {
-                                                        if (err.name !== 'AbortError') {
-                                                            console.log('Share failed:', err);
-                                                        }
-                                                    }
+                                                    } catch (err) {}
                                                 } else {
-                                                    // Fallback: copy to clipboard
-                                                    try {
-                                                        await navigator.clipboard.writeText(shareUrl);
-                                                        alert('Link copied to clipboard!');
-                                                    } catch (err) {
-                                                        // Final fallback
-                                                        const textArea = document.createElement('textarea');
-                                                        textArea.value = shareUrl;
-                                                        document.body.appendChild(textArea);
-                                                        textArea.select();
-                                                        document.execCommand('copy');
-                                                        document.body.removeChild(textArea);
-                                                        alert('Link copied to clipboard!');
-                                                    }
+                                                    navigator.clipboard.writeText(shareUrl);
+                                                    alert('Campaign link copied! Share with friends to unlock more plays.');
                                                 }
                                             }}
-                                            className="w-full bg-gray-100 text-gray-700 py-2 sm:py-2.5 rounded-lg hover:bg-gray-200 text-sm sm:text-base font-medium transition-all active:scale-95 flex items-center justify-center gap-2 mb-3"
+                                            className="w-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 mb-2"
                                         >
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                            </svg>
-                                            Share with Friends
+                                            🚀 Share with Friends
                                         </button>
 
                                         {campaign.is_in_store && (
                                             <button
                                                 onClick={handlePlayAgain}
-                                                className="w-full bg-blue-500 text-white py-3 sm:py-4 rounded-lg sm:rounded-xl hover:bg-blue-600 text-base sm:text-lg font-bold transition-all active:scale-95"
+                                                className="w-full bg-blue-600 text-white py-3 rounded-xl hover:bg-blue-700 text-sm font-bold transition-all mt-2"
                                             >
                                                 Next Customer
                                             </button>
@@ -449,26 +842,95 @@ const PublicCampaignPage = () => {
                                 </div>
                             </div>
                         )}
+
+                        {/* Persistent Won Prize Tray (Stays on screen after winning) */}
+                        {claimedReward && claimedReward.is_winning && !wonPrize && (
+                            <div 
+                                style={{ borderColor: primaryColor + '90' }}
+                                className="fixed bottom-4 left-4 right-4 max-w-xl mx-auto bg-slate-950/95 text-white backdrop-blur-md p-3 sm:p-4 rounded-2xl shadow-2xl border-2 z-40 flex items-center justify-between gap-3 animate-in slide-in-from-bottom duration-300"
+                            >
+                                <div className="flex items-center gap-3 overflow-hidden">
+                                    <span className="text-2xl sm:text-3xl flex-shrink-0">🎁</span>
+                                    <div className="truncate">
+                                        <span 
+                                            style={{ color: secondaryColor }}
+                                            className="text-[10px] uppercase tracking-widest font-black block"
+                                        >
+                                            Your Claimed Reward
+                                        </span>
+                                        <p className="font-bold text-xs sm:text-sm text-white truncate">
+                                            {claimedReward.name}
+                                        </p>
+                                        <span 
+                                            style={{ color: secondaryColor }}
+                                            className="font-mono text-xs font-black tracking-wider"
+                                        >
+                                            {claimedReward.coupon_code || `WIN-${claimedReward.id}`}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                    <button
+                                        onClick={() => {
+                                            const code = claimedReward.coupon_code || `WIN-${claimedReward.id}`;
+                                            navigator.clipboard.writeText(code);
+                                            setCopiedCode(true);
+                                            setTimeout(() => setCopiedCode(false), 2000);
+                                        }}
+                                        className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                                            copiedCode ? 'bg-emerald-500 text-white' : 'bg-white text-slate-950 hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {copiedCode ? '✅ Copied' : '📋 Copy'}
+                                    </button>
+
+                                    {(campaign.design_settings?.store_url || claimedReward.store_url) ? (
+                                        <a
+                                            href={campaign.design_settings?.store_url || claimedReward.store_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{ backgroundColor: primaryColor }}
+                                            className="px-3.5 py-1.5 hover:opacity-90 text-white font-black text-xs rounded-xl transition-all shadow-md flex items-center gap-1"
+                                        >
+                                            <span>Redeem</span>
+                                            <ExternalLink size={12} />
+                                        </a>
+                                    ) : (
+                                        <button
+                                            onClick={() => setWonPrize(claimedReward)}
+                                            style={{ backgroundColor: primaryColor }}
+                                            className="px-3 py-1.5 text-white font-bold text-xs rounded-xl transition-all"
+                                        >
+                                            Voucher
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Footer */}
-                    <footer className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-                        <div className="w-full px-4 py-3">
-                            <div className="text-center">
-                                <p className="text-xs text-gray-500">
-                                    Powered by{' '}
-                                    <a
-                                        href="https://coffercard.com"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-600 hover:text-blue-700 font-medium"
-                                    >
-                                        coffercard.com
-                                    </a>
-                                </p>
+                    {!isEmbed && (
+                        <footer className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-gray-200/80 z-20">
+                            <div className="w-full px-4 py-2.5">
+                                <div className="text-center">
+                                    <p className="text-xs text-gray-500">
+                                        Powered by{' '}
+                                        <a
+                                            href="https://coffercard.com"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-indigo-600 hover:text-indigo-800 font-bold"
+                                        >
+                                            coffercard.com
+                                        </a>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </footer>
+                        </footer>
+                    )}
                 </div>
             )}
         </>

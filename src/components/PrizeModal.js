@@ -8,6 +8,7 @@ const PrizeModal = ({ campaign, onClose }) => {
         description: '',
         probability: '',
         quantity: '',
+        coupon_code: '',
         is_winning: true
     });
     const [error, setError] = useState(null);
@@ -46,6 +47,7 @@ const PrizeModal = ({ campaign, onClose }) => {
             description: prize.description,
             probability: prize.probability.toString(),
             quantity: prize.quantity.toString(),
+            coupon_code: prize.coupon_code || '',
             is_winning: prize.is_winning
         });
         setError(null);
@@ -58,6 +60,7 @@ const PrizeModal = ({ campaign, onClose }) => {
             description: '',
             probability: '',
             quantity: '',
+            coupon_code: '',
             is_winning: true
         });
         setError(null);
@@ -105,6 +108,13 @@ const PrizeModal = ({ campaign, onClose }) => {
                 campaign: campaign.id
             };
 
+            // Add coupon code if winning prize
+            if (newPrize.is_winning && newPrize.coupon_code) {
+                payload.coupon_code = newPrize.coupon_code.trim().toUpperCase();
+            } else if (newPrize.is_winning && !newPrize.coupon_code) {
+                payload.coupon_code = '';
+            }
+
             // Only add quantity for winning prizes
             if (newPrize.is_winning) {
                 payload.quantity = parseInt(newPrize.quantity);
@@ -141,6 +151,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                 description: '',
                 probability: '',
                 quantity: '',
+                coupon_code: '',
                 is_winning: true
             });
             setEditingPrize(null);
@@ -233,9 +244,14 @@ const PrizeModal = ({ campaign, onClose }) => {
                                             </span>
                                         </div>
                                         <div className="text-sm text-gray-600">{prize.description}</div>
-                                        <div className="text-xs sm:text-sm mt-1">
-                                            <span className="mr-4">Probability: {prize.probability}%</span>
+                                        <div className="text-xs sm:text-sm mt-1 flex items-center gap-3 flex-wrap">
+                                            <span>Probability: {prize.probability}%</span>
                                             {prize.is_winning && prize.quantity > 0 && <span>Quantity: {prize.quantity}</span>}
+                                            {prize.coupon_code && (
+                                                <span className="font-mono text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">
+                                                    🎟️ {prize.coupon_code}
+                                                </span>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="flex gap-2 sm:ml-4">
@@ -346,6 +362,19 @@ const PrizeModal = ({ campaign, onClose }) => {
                                 </div>
                             )}
                         </div>
+                        {newPrize.is_winning && (
+                            <div>
+                                <label className="block text-sm font-medium mb-1">Coupon / Promo Code (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={newPrize.coupon_code}
+                                    onChange={e => setNewPrize({...newPrize, coupon_code: e.target.value.toUpperCase()})}
+                                    className="w-full p-2 border rounded font-mono uppercase tracking-wider text-sm"
+                                    placeholder="e.g. SAVE20, LUCKY50, FREESHIP"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">If blank, an automatic code will be generated for the winner.</p>
+                            </div>
+                        )}
                         <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
                             {editingPrize && (
                                 <button

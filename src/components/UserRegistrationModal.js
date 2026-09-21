@@ -7,11 +7,12 @@ const UserRegistrationModal = ({onSubmit, onClose }) => {
         phone: ''
     });
     const [errors, setErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const validatePhone = (phone) => {
-        // Remove any non-digit characters for validation
+        // Allow 10 to 15 digits (to support country codes)
         const digitsOnly = phone.replace(/\D/g, '');
-        return digitsOnly.length === 10;
+        return digitsOnly.length >= 10 && digitsOnly.length <= 15;
     };
 
     const handlePhoneChange = (e) => {
@@ -19,21 +20,32 @@ const UserRegistrationModal = ({onSubmit, onClose }) => {
         setFormData({...formData, phone});
 
         // Clear error when user starts typing
-        if (errors.phone) {
-            setErrors({...errors, phone: ''});
+        if (errors.phone || errors.submit) {
+            setErrors({...errors, phone: '', submit: ''});
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (isSubmitting) return;
 
         // Validate phone number
         if (!validatePhone(formData.phone)) {
-            setErrors({...errors, phone: 'Phone number must be exactly 10 digits'});
+            setErrors({...errors, phone: 'Please enter a valid phone number (10-15 digits)'});
             return;
         }
 
-        await onSubmit(formData);
+        setIsSubmitting(true);
+        try {
+            await onSubmit(formData);
+        } catch (err) {
+            setErrors(prev => ({
+                ...prev,
+                submit: err.message || 'Registration failed. Please try again.'
+            }));
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -81,11 +93,19 @@ const UserRegistrationModal = ({onSubmit, onClose }) => {
                             <p className="text-red-500 text-xs sm:text-sm mt-1">{errors.phone}</p>
                         )}
                     </div>
+                    {errors.submit && (
+                        <div className="p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-xs sm:text-sm rounded">
+                            {errors.submit}
+                        </div>
+                    )}
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2.5 sm:py-3 rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base font-medium mt-4"
+                        disabled={isSubmitting}
+                        className={`w-full py-2.5 sm:py-3 rounded-lg text-white font-medium text-sm sm:text-base mt-4 transition-colors ${
+                            isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'
+                        }`}
                     >
-                        Submit & Play
+                        {isSubmitting ? 'Submitting...' : 'Submit & Play'}
                     </button>
                 </form>
             </div>
