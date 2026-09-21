@@ -373,11 +373,14 @@ const PrizeModal = ({ campaign, onClose }) => {
                                             <span>Probability: {prize.probability}%</span>
                                             {prize.is_winning && (
                                                 <span className="flex items-center gap-1.5 flex-wrap">
-                                                    <span>Qty: <strong>{prize.quantity}</strong></span>
-                                                    <span className="text-blue-700 font-medium">({prize.redeemed_count || 0} redeemed)</span>
-                                                    <span>•</span>
-                                                    <span className={(prize.remaining_quantity ?? prize.quantity) > 0 ? "text-emerald-700 font-semibold" : "text-red-600 font-bold"}>
-                                                        {(prize.remaining_quantity ?? prize.quantity) > 0 ? `${prize.remaining_quantity ?? prize.quantity} left` : "Exhausted"}
+                                                    <span>Available to Win: <strong>{prize.quantity}</strong></span>
+                                                    <span className="text-gray-400">•</span>
+                                                    <span className="text-gray-600">Won: <strong>{prize.claimed_count || 0}</strong></span>
+                                                    <span className="text-gray-400">•</span>
+                                                    <span className="text-blue-700 font-medium">Redeemed: <strong>{prize.redeemed_count || 0}</strong></span>
+                                                    <span className="text-gray-400">•</span>
+                                                    <span className={prize.quantity > 0 ? "text-emerald-700 font-semibold" : "text-red-600 font-bold"}>
+                                                        {prize.quantity > 0 ? "In Stock" : "Finished"}
                                                     </span>
                                                 </span>
                                             )}
@@ -506,7 +509,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                             </div>
                             {newPrize.is_winning && (
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Quantity Available</label>
+                                    <label className="block text-sm font-medium mb-1">Quantity Available to Win</label>
                                     <input
                                         type="number"
                                         value={newPrize.quantity}
@@ -515,6 +518,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                                         min="1"
                                         required
                                     />
+                                    <p className="text-xs text-gray-500 mt-1">Number of times this prize can be won before it runs out.</p>
                                 </div>
                             )}
                         </div>
