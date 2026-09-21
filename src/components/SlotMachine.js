@@ -5,7 +5,7 @@ import { soundManager } from '../utils/soundEffects';
 
 const SLOT_ICONS = ['7️⃣', '💎', '🍒', '🔔', '👑', '💰', '⭐', '🍇'];
 
-const SlotMachine = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration }) => {
+const SlotMachine = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration, onIpLimitReached }) => {
     const [isSpinning, setIsSpinning] = useState(false);
     const [leverPulled, setLeverPulled] = useState(false);
     const [reels, setReels] = useState(['7️⃣', '7️⃣', '7️⃣']);
@@ -81,6 +81,12 @@ const SlotMachine = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRe
             }
 
             if (!response.ok) {
+                if (data.ip_limit_reached || data.status === 'ip_limit_reached') {
+                    if (onIpLimitReached) {
+                        onIpLimitReached(data);
+                        return;
+                    }
+                }
                 if (data.can_unlock_with_share) {
                     setCanShare(true);
                 }

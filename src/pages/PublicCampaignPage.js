@@ -9,7 +9,7 @@ import { BASE_URL } from '../services/api';
 import SocialGuidelines from '../components/SocialGuidelines';
 import UserRegistrationModal from '../components/UserRegistrationModal';
 import { soundManager } from '../utils/soundEffects';
-import { Volume2, VolumeX, Sparkles, Trophy, ExternalLink, Copy, Check, Gift, Store } from 'lucide-react';
+import { Volume2, VolumeX, Sparkles, Trophy, ExternalLink, Copy, Check, Gift, Store, ShieldAlert } from 'lucide-react';
 
 const RECENT_WINNERS = [
     { name: 'Alex M.', prize: '25% OFF Voucher', time: '2m ago' },
@@ -150,15 +150,20 @@ const PublicCampaignPage = () => {
                     throw jsonErr;
                 }
 
-                // Handle campaign status (not started or ended)
+                // Handle campaign status (not started, ended, or ip limit reached)
                 if (!response.ok) {
-                    if (data && (data.status === 'not_started' || data.status === 'ended')) {
+                    if (data && (data.status === 'not_started' || data.status === 'ended' || data.status === 'ip_limit_reached')) {
                         setCampaignStatus({
                             status: data.status,
-                            message: data.message,
+                            message: data.message || data.error,
                             campaign_name: data.campaign_name,
                             start_date: data.start_date,
-                            end_date: data.end_date
+                            end_date: data.end_date,
+                            max_spins_per_ip: data.max_spins_per_ip,
+                            total_ip_plays: data.total_ip_plays,
+                            design_settings: data.design_settings || {},
+                            vendor_name: data.vendor_name,
+                            vendor_logo: data.vendor_logo,
                         });
                         setLoading(false);
                         return;
@@ -257,6 +262,19 @@ const PublicCampaignPage = () => {
         }
     };
 
+    const handleIpLimitReached = (limitData) => {
+        setCampaignStatus({
+            status: 'ip_limit_reached',
+            message: limitData?.message || limitData?.error || 'Maximum play limit reached for your network / IP address.',
+            campaign_name: campaign?.name,
+            max_spins_per_ip: limitData?.max_spins_per_ip || campaign?.max_spins_per_ip || 50,
+            total_ip_plays: limitData?.total_ip_plays,
+            design_settings: campaign?.design_settings || {},
+            vendor_name: campaign?.vendor_name,
+            vendor_logo: campaign?.vendor_logo,
+        });
+    };
+
     const handleScratchStart = async () => {
         if (isGettingScratchCard) return; // Prevent double clicks
 
@@ -282,6 +300,10 @@ const PublicCampaignPage = () => {
             }
 
             if (!response.ok) {
+                if (data.ip_limit_reached || data.status === 'ip_limit_reached') {
+                    handleIpLimitReached(data);
+                    return;
+                }
                 throw new Error(data.error || 'Failed to get scratch card');
             }
 
@@ -320,7 +342,7 @@ const PublicCampaignPage = () => {
         </div>
     );
 
-    // Display friendly message if campaign hasn't started or has ended
+    // Display friendly message if campaign hasn't started, has ended, or network IP limit is reached
     if (campaignStatus) {
         const formatDate = (dateString) => {
             return new Date(dateString).toLocaleDateString('en-US', {
@@ -331,6 +353,154 @@ const PublicCampaignPage = () => {
                 minute: '2-digit'
             });
         };
+
+        if (campaignStatus.status === 'ip_limit_reached') {
+            const statusDesign = campaignStatus.design_settings || campaign?.design_settings || {};
+            const statusBgStyle = statusDesign.bg_style || 'theme_default';
+            const statusBgSolid = statusDesign.bg_solid_color || '#0f172a';
+            const statusBgImage = statusDesign.bg_image_url || '';
+            const statusFont = statusDesign.font_family || 'sans';
+            const statusTheme = THEMES.find(t => t.id === (statusDesign.theme_style || 'modern')) || THEMES[0];
+            const statusIsLight = 
+                statusBgStyle === 'mesh_light' ||
+                (statusBgStyle === 'theme_default' && statusTheme.category === 'light') ||
+                (statusBgStyle === 'custom_solid' && isColorLight(statusBgSolid));
+
+            const fontCls = 
+                statusFont === 'serif' ? 'font-brand-serif' :
+                statusFont === 'display' ? 'font-brand-display' :
+                statusFont === 'outfit' ? 'font-brand-outfit' : 'font-brand-sans';
+
+            const bgStyleObj = statusBgStyle === 'custom_image' && statusBgImage ? {
+                backgroundImage: `linear-gradient(rgba(10, 15, 29, 0.84), rgba(10, 15, 29, 0.90)), url(${statusBgImage})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundAttachment: 'fixed',
+                backgroundColor: '#0F172A'
+            } : statusBgStyle === 'custom_solid' ? {
+                backgroundColor: statusBgSolid
+            } : {
+                backgroundColor: statusTheme.bgHex
+            };
+
+            const bgCls = statusBgStyle === 'mesh_dark' ? 'bg-mesh-aurora text-white' :
+                statusBgStyle === 'mesh_light' ? 'bg-mesh-light text-slate-900' :
+                statusBgStyle === 'custom_image' ? 'text-white' :
+                statusIsLight ? 'text-slate-900' : 'text-white';
+
+            return (
+                <div className={`min-h-screen flex flex-col justify-between py-8 sm:py-12 px-4 transition-colors ${bgCls} ${fontCls}`} style={bgStyleObj}>
+                    {/* Floating sound toggle */}
+                    <button
+                        type="button"
+                        onClick={() => {
+                            const nextMuted = soundManager.toggleMute();
+                            setIsMuted(nextMuted);
+                        }}
+                        className="fixed top-4 right-4 z-40 px-3 py-1.5 rounded-full shadow-md border backdrop-blur-md transition-all active:scale-95 flex items-center gap-1.5 text-xs font-bold bg-white/90 text-gray-800 border-gray-200"
+                    >
+                        {isMuted ? <VolumeX size={15} className="text-rose-500" /> : <Volume2 size={15} className="text-emerald-500" />}
+                        <span className="text-[11px] uppercase tracking-wider hidden sm:inline">{isMuted ? 'Muted' : 'Sound'}</span>
+                    </button>
+
+                    <div className="w-full max-w-md mx-auto my-auto relative z-10">
+                        {/* Vendor Logo */}
+                        {campaignStatus.vendor_logo && (
+                            <div className="mb-4 flex justify-center">
+                                <img
+                                    src={campaignStatus.vendor_logo}
+                                    alt={campaignStatus.vendor_name || 'Brand Logo'}
+                                    className="h-12 w-auto object-contain rounded-xl drop-shadow-md"
+                                />
+                            </div>
+                        )}
+
+                        <div className={`rounded-3xl p-6 sm:p-8 border backdrop-blur-xl shadow-2xl text-center ${
+                            statusIsLight 
+                                ? 'bg-white/95 border-slate-200 text-slate-900 shadow-slate-200/50' 
+                                : 'bg-slate-900/90 border-white/15 text-white shadow-black/60'
+                        }`}>
+                            {/* Shield Icon Pill */}
+                            <div className="mx-auto w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mb-4 text-amber-400 shadow-inner">
+                                <ShieldAlert size={32} />
+                            </div>
+
+                            <span className="inline-block text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 mb-3">
+                                Play Limit Reached
+                            </span>
+
+                            <h2 className="text-2xl sm:text-3xl font-black tracking-tight mb-2">
+                                Maximum Plays Reached
+                            </h2>
+
+                            <p className={`text-sm sm:text-base leading-relaxed mb-6 ${statusIsLight ? 'text-slate-600' : 'text-slate-300'}`}>
+                                {campaignStatus.message || `This campaign allows a maximum of ${campaignStatus.max_spins_per_ip || 50} plays per network / IP address. All plays for this network have been completed.`}
+                            </p>
+
+                            {/* If visitor already claimed/won a reward, showcase it! */}
+                            {claimedReward && claimedReward.is_winning ? (
+                                <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 text-left">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1.5">
+                                            <Trophy size={14} /> You Already Won
+                                        </span>
+                                        <span className="text-[10px] bg-emerald-500 text-slate-950 font-black px-2 py-0.5 rounded-full">
+                                            VOUCHER ACTIVE
+                                        </span>
+                                    </div>
+                                    <h3 className="text-base font-black mb-1">
+                                        {claimedReward.name}
+                                    </h3>
+                                    {claimedReward.coupon_code && (
+                                        <div className="mt-2.5 flex items-center gap-2 bg-black/40 p-2.5 rounded-xl border border-white/10 font-mono text-amber-300 text-xs font-bold">
+                                            <span className="flex-1 tracking-wider">{claimedReward.coupon_code}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(claimedReward.coupon_code);
+                                                    setCopiedCode(true);
+                                                    setTimeout(() => setCopiedCode(false), 2000);
+                                                }}
+                                                className="px-2 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition-colors flex items-center gap-1"
+                                            >
+                                                {copiedCode ? <Check size={12} /> : <Copy size={12} />}
+                                                {copiedCode ? 'Copied' : 'Copy'}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : null}
+
+                            {/* Storefront redirect link if available */}
+                            {statusDesign.store_url && (
+                                <a
+                                    href={statusDesign.store_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full py-3.5 px-6 rounded-2xl font-black text-sm sm:text-base flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white hover:brightness-110 shadow-lg transition-all mb-4"
+                                >
+                                    <Store size={18} />
+                                    <span>Visit Store & Redeem Voucher</span>
+                                    <ExternalLink size={16} />
+                                </a>
+                            )}
+
+                            <div className="p-3 bg-black/20 rounded-xl text-left border border-white/5 text-[11px] opacity-75 space-y-1">
+                                <p className="font-semibold">💡 Why am I seeing this?</p>
+                                <p>To ensure fair distribution of prizes, this campaign sets a play limit per network. If you are connected to shared Wi-Fi (office, cafe, school), other users on your network may have used the plays.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="py-4 text-center text-xs opacity-60">
+                        <span>Powered by </span>
+                        <a href="https://coffercard.com" target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">
+                            coffercard.com
+                        </a>
+                    </div>
+                </div>
+            );
+        }
 
         return (
             <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center px-4">
@@ -616,6 +786,7 @@ const PublicCampaignPage = () => {
                                         setNeedsUserDetails(true);
                                         setIsRegistered(false);
                                     }}
+                                    onIpLimitReached={handleIpLimitReached}
                                 />
                             )}
 
@@ -630,6 +801,7 @@ const PublicCampaignPage = () => {
                                         setNeedsUserDetails(true);
                                         setIsRegistered(false);
                                     }}
+                                    onIpLimitReached={handleIpLimitReached}
                                 />
                             )}
 
@@ -644,6 +816,7 @@ const PublicCampaignPage = () => {
                                         setNeedsUserDetails(true);
                                         setIsRegistered(false);
                                     }}
+                                    onIpLimitReached={handleIpLimitReached}
                                 />
                             )}
 

@@ -42,7 +42,7 @@ const BOX_DESIGNS = [
     }
 ];
 
-const MysteryBox = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration }) => {
+const MysteryBox = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration, onIpLimitReached }) => {
     const [selectedBoxId, setSelectedBoxId] = useState(null);
     const [isOpening, setIsOpening] = useState(false);
     const [isOpened, setIsOpened] = useState(false);
@@ -114,6 +114,12 @@ const MysteryBox = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsReg
 
             if (!response.ok) {
                 setSelectedBoxId(null);
+                if (data.ip_limit_reached || data.status === 'ip_limit_reached') {
+                    if (onIpLimitReached) {
+                        onIpLimitReached(data);
+                        return;
+                    }
+                }
                 if (data.can_unlock_with_share) {
                     setCanShare(true);
                 }

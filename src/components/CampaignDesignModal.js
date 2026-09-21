@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { 
     Palette, Sparkles, ExternalLink, Check, Store, Type, AlignLeft, 
     Globe, Eye, RefreshCw, Smartphone, Monitor, Image as ImageIcon,
-    Sliders, Layout, ShieldCheck, Sun, Moon
+    Sliders, Layout, ShieldCheck, Sun, Moon, Lock, LockOpen, ScrollText,
+    Instagram, Facebook, ArrowRight
 } from 'lucide-react';
 import { BASE_URL, fetchWithAuth } from '../services/api';
 
@@ -177,10 +178,22 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
     const [storeUrl, setStoreUrl] = useState(existingDesign.store_url || '');
     const [ctaText, setCtaText] = useState(existingDesign.cta_text || 'Redeem & Shop Now');
     
+    // Unlock Screen Settings & Copy
+    const [showSocialPage, setShowSocialPage] = useState(campaign.show_social_page || false);
+    const [unlockBadge, setUnlockBadge] = useState(existingDesign.unlock_badge || 'VIP Campaign Unlock');
+    const [unlockHeadline, setUnlockHeadline] = useState(existingDesign.unlock_headline || '');
+    const [unlockSubheadline, setUnlockSubheadline] = useState(existingDesign.unlock_subheadline || '');
+    const [guidelinesTitle, setGuidelinesTitle] = useState(existingDesign.guidelines_title || 'Campaign Guidelines');
+    const [guidelinesText, setGuidelinesText] = useState(campaign.guidelines || '');
+    const [instagramLink, setInstagramLink] = useState(campaign.instagram_link || '');
+    const [facebookLink, setFacebookLink] = useState(campaign.facebook_link || '');
+    const [unlockBtnText, setUnlockBtnText] = useState(existingDesign.unlock_btn_text || 'Start Game Now');
+
     // Modal UI states
-    const [activeTab, setActiveTab] = useState('colors'); // 'colors' | 'typography' | 'copy' | 'preview'
+    const [activeTab, setActiveTab] = useState('colors'); // 'colors' | 'typography' | 'copy' | 'unlock' | 'preview'
     const [presetFilter, setPresetFilter] = useState('all'); // 'all' | 'light' | 'dark'
     const [previewDevice, setPreviewDevice] = useState('mobile'); // 'mobile' | 'desktop'
+    const [previewScreen, setPreviewScreen] = useState('game'); // 'game' | 'unlock'
     const [saving, setSaving] = useState(false);
     const [savedSuccess, setSavedSuccess] = useState(false);
     const [error, setError] = useState(null);
@@ -222,7 +235,12 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
             headline: headline.trim(),
             subheadline: subheadline.trim(),
             store_url: storeUrl.trim(),
-            cta_text: ctaText.trim() || 'Redeem & Shop Now'
+            cta_text: ctaText.trim() || 'Redeem & Shop Now',
+            unlock_badge: unlockBadge.trim(),
+            unlock_headline: unlockHeadline.trim(),
+            unlock_subheadline: unlockSubheadline.trim(),
+            guidelines_title: guidelinesTitle.trim(),
+            unlock_btn_text: unlockBtnText.trim()
         };
 
         try {
@@ -230,9 +248,10 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                 ...campaign,
                 start_date: new Date(campaign.start_date).toISOString(),
                 end_date: new Date(campaign.end_date).toISOString(),
-                instagram_link: campaign.instagram_link || '',
-                facebook_link: campaign.facebook_link || '',
-                guidelines: campaign.guidelines || '',
+                show_social_page: showSocialPage,
+                instagram_link: instagramLink.trim(),
+                facebook_link: facebookLink.trim(),
+                guidelines: guidelinesText.trim(),
                 design_settings: updatedDesign
             };
 
@@ -400,6 +419,21 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                     >
                         <Store size={15} />
                         <span>3. Messaging & Store Link</span>
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            setActiveTab('unlock');
+                            setPreviewScreen('unlock');
+                        }}
+                        className={`py-3 px-3.5 border-b-2 flex items-center gap-2 transition-all whitespace-nowrap ${
+                            activeTab === 'unlock'
+                                ? 'border-indigo-600 text-indigo-700 bg-white shadow-xs rounded-t-lg'
+                                : 'border-transparent text-gray-500 hover:text-gray-900'
+                        }`}
+                    >
+                        <LockOpen size={15} />
+                        <span>4. Unlock Screen</span>
                     </button>
 
                     <button
@@ -874,25 +908,188 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                             </div>
                         )}
 
+                        {activeTab === 'unlock' && (
+                            <div className="space-y-5">
+                                {/* Toggle Pre-game unlock screen */}
+                                <div className="p-4 bg-indigo-50/70 border border-indigo-200/80 rounded-2xl">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <h3 className="text-sm font-black text-indigo-950 flex items-center gap-2">
+                                                <Lock size={16} className="text-indigo-600" />
+                                                Enable Pre-Game Social Unlock Screen
+                                            </h3>
+                                            <p className="text-xs text-indigo-900/80 mt-0.5 leading-relaxed">
+                                                Visitors must view rules and follow your Instagram or Facebook before playing.
+                                            </p>
+                                        </div>
+                                        <label className="relative inline-flex items-center cursor-pointer">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={showSocialPage} 
+                                                onChange={(e) => setShowSocialPage(e.target.checked)}
+                                                className="sr-only peer"
+                                            />
+                                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <Sparkles size={14} className="text-indigo-600" />
+                                        Unlock Screen Badge Pill
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={unlockBadge}
+                                        onChange={(e) => setUnlockBadge(e.target.value)}
+                                        placeholder="e.g. VIP Campaign Unlock"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <Type size={14} className="text-indigo-600" />
+                                        Unlock Screen Headline
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={unlockHeadline}
+                                        onChange={(e) => setUnlockHeadline(e.target.value)}
+                                        placeholder={headline || campaign.name || 'e.g. Follow & Play to Win'}
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <AlignLeft size={14} className="text-indigo-600" />
+                                        Unlock Subtitle / Hook
+                                    </label>
+                                    <textarea
+                                        value={unlockSubheadline}
+                                        onChange={(e) => setUnlockSubheadline(e.target.value)}
+                                        placeholder="Complete these quick steps to unlock your chance to win instant rewards!"
+                                        rows={2}
+                                        className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                    />
+                                </div>
+
+                                <div className="pt-2 border-t border-gray-100">
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <ScrollText size={14} className="text-indigo-600" />
+                                        Guidelines Box Title
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={guidelinesTitle}
+                                        onChange={(e) => setGuidelinesTitle(e.target.value)}
+                                        placeholder="Campaign Guidelines"
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                                        <span className="flex items-center gap-1.5">
+                                            <AlignLeft size={14} className="text-indigo-600" />
+                                            Campaign Guidelines / Rules (1 per line)
+                                        </span>
+                                        <span className="text-[10px] text-gray-400 font-normal">Each line creates a numbered step</span>
+                                    </label>
+                                    <textarea
+                                        value={guidelinesText}
+                                        onChange={(e) => setGuidelinesText(e.target.value)}
+                                        placeholder={"Follow our official page to unlock play\nComplete the game challenge to win exclusive prizes\nPresent voucher to redeem in-store"}
+                                        rows={4}
+                                        className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden font-mono text-xs"
+                                    />
+                                </div>
+
+                                <div className="pt-2 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                            <Instagram size={14} className="text-pink-600" />
+                                            Instagram Follow URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={instagramLink}
+                                            onChange={(e) => setInstagramLink(e.target.value)}
+                                            placeholder="https://instagram.com/yourbrand"
+                                            className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                            <Facebook size={14} className="text-blue-600" />
+                                            Facebook Follow URL
+                                        </label>
+                                        <input
+                                            type="url"
+                                            value={facebookLink}
+                                            onChange={(e) => setFacebookLink(e.target.value)}
+                                            placeholder="https://facebook.com/yourbrand"
+                                            className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-black text-gray-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                        <Sparkles size={14} className="text-indigo-600" />
+                                        Unlocked Play Button Label
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={unlockBtnText}
+                                        onChange={(e) => setUnlockBtnText(e.target.value)}
+                                        placeholder="🎮 Start Game Now"
+                                        className="w-full px-3.5 py-2 text-sm border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-hidden"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                     </div>
 
                     {/* Right Panel: Live Split-Screen Interactive Preview */}
                     <div className={`w-full md:w-1/2 bg-slate-900 border-l border-gray-800 flex flex-col ${activeTab !== 'preview' ? 'hidden md:flex' : 'flex'}`}>
                         
                         {/* Device Frame Switcher */}
-                        <div className="px-4 py-2 bg-slate-950 border-b border-gray-800 flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    Live Canvas
-                                </span>
+                        <div className="px-3 py-2 bg-slate-950 border-b border-gray-800 flex items-center justify-between gap-2">
+                            {/* Screen View Switcher: Game View vs Unlock Screen */}
+                            <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-gray-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewScreen('game')}
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                                        previewScreen === 'game'
+                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            : 'text-gray-400 hover:text-white'
+                                    }`}
+                                >
+                                    🎮 Game View
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setPreviewScreen('unlock')}
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
+                                        previewScreen === 'unlock'
+                                            ? 'bg-indigo-600 text-white shadow-xs'
+                                            : 'text-gray-400 hover:text-white'
+                                    }`}
+                                >
+                                    <Lock size={11} /> Unlock Screen
+                                </button>
                             </div>
 
                             <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-lg border border-gray-800">
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('mobile')}
-                                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition-all ${
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
                                         previewDevice === 'mobile'
                                             ? 'bg-indigo-600 text-white shadow-xs'
                                             : 'text-gray-400 hover:text-white'
@@ -903,7 +1100,7 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                                 <button
                                     type="button"
                                     onClick={() => setPreviewDevice('desktop')}
-                                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition-all ${
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 transition-all ${
                                         previewDevice === 'desktop'
                                             ? 'bg-indigo-600 text-white shadow-xs'
                                             : 'text-gray-400 hover:text-white'
@@ -925,29 +1122,146 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                                         : 'w-full h-full rounded-2xl border border-gray-800 p-6 flex flex-col justify-between shadow-2xl'
                                 }`}
                             >
-                                {/* Simulated Header */}
-                                <div className="text-center pt-2">
-                                    {/* Brand Logo */}
-                                    {logoUrl ? (
-                                        <div className="mb-2 flex justify-center">
-                                            <img
-                                                src={logoUrl}
-                                                alt="Brand Logo"
-                                                className={`object-contain rounded-lg drop-shadow-md ${
-                                                    logoSize === 'sm' ? 'h-7' : logoSize === 'lg' ? 'h-12' : 'h-9'
-                                                }`}
-                                            />
-                                        </div>
-                                    ) : (
-                                        <div className="mb-2 flex justify-center">
-                                            <div
-                                                style={{ backgroundColor: primaryColor }}
-                                                className="w-8 h-8 rounded-xl text-white font-black flex items-center justify-center text-xs shadow-md"
-                                            >
-                                                {campaign.vendor_name ? campaign.vendor_name.charAt(0).toUpperCase() : '🎁'}
+                                {previewScreen === 'unlock' ? (
+                                    <div className="w-full flex flex-col justify-between flex-1 py-1">
+                                        {/* Simulated Header */}
+                                        <div className="text-center pt-1">
+                                            {logoUrl ? (
+                                                <div className="mb-1.5 flex justify-center">
+                                                    <img
+                                                        src={logoUrl}
+                                                        alt="Brand Logo"
+                                                        className={`object-contain rounded-lg drop-shadow-md ${
+                                                            logoSize === 'sm' ? 'h-6' : logoSize === 'lg' ? 'h-10' : 'h-8'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="mb-1.5 flex justify-center">
+                                                    <div
+                                                        style={{ backgroundColor: primaryColor }}
+                                                        className="w-7 h-7 rounded-xl text-white font-black flex items-center justify-center text-xs shadow-md"
+                                                    >
+                                                        {campaign.vendor_name ? campaign.vendor_name.charAt(0).toUpperCase() : '🎁'}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-center mb-1">
+                                                <span
+                                                    style={{ 
+                                                        borderColor: isLightMode ? primaryColor + '40' : primaryColor + '60', 
+                                                        color: primaryColor,
+                                                        backgroundColor: isLightMode ? primaryColor + '10' : primaryColor + '20'
+                                                    }}
+                                                    className="inline-block text-[8px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-full backdrop-blur-md border shadow-xs"
+                                                >
+                                                    {unlockBadge || 'VIP Campaign Unlock'}
+                                                </span>
                                             </div>
+
+                                            <h2 className={`text-base font-black tracking-tight leading-snug ${isLightMode ? 'text-slate-900' : 'text-white'}`}>
+                                                {unlockHeadline || headline || campaign.name}
+                                            </h2>
+
+                                            <p className={`text-[10px] max-w-xs mx-auto mt-0.5 line-clamp-2 ${isLightMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                                                {unlockSubheadline || 'Complete these quick steps to unlock your chance to win instant rewards!'}
+                                            </p>
                                         </div>
-                                    )}
+
+                                        {/* Simulated Step Indicator */}
+                                        <div className={`my-2 p-2 rounded-xl border backdrop-blur-xs flex items-center justify-between text-[9px] font-bold ${
+                                            isLightMode ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-white/[0.06] border-white/10 text-slate-300'
+                                        }`}>
+                                            <span className="text-emerald-500 font-black">1. Follow Social</span>
+                                            <span>→</span>
+                                            <span>2. Unlock Play</span>
+                                            <span>→</span>
+                                            <span>3. Win Prize</span>
+                                        </div>
+
+                                        {/* Guidelines Card */}
+                                        <div className={`my-1 p-2.5 rounded-2xl border backdrop-blur-md text-left text-[11px] ${
+                                            isLightMode ? 'bg-white/90 border-slate-200 text-slate-800' : 'bg-white/[0.08] border-white/15 text-slate-200'
+                                        }`}>
+                                            <div className="font-bold text-[10px] mb-1.5 flex items-center gap-1 border-b border-gray-500/20 pb-1">
+                                                <ScrollText size={12} style={{ color: primaryColor }} />
+                                                <span>{guidelinesTitle || 'Campaign Guidelines'}</span>
+                                            </div>
+                                            <ol className="space-y-1">
+                                                {(guidelinesText || 'Follow our official page to unlock play\nComplete the game challenge to win exclusive rewards\nPresent winning voucher in-store to redeem')
+                                                    .split('\n')
+                                                    .map(l => l.trim())
+                                                    .filter(Boolean)
+                                                    .slice(0, 3)
+                                                    .map((item, idx) => (
+                                                        <li key={idx} className="flex items-start gap-1.5 text-[9px]">
+                                                            <span 
+                                                                style={{ backgroundColor: primaryColor + '25', color: primaryColor }}
+                                                                className="flex-shrink-0 w-3.5 h-3.5 rounded-full font-bold flex items-center justify-center text-[8px] mt-0.5"
+                                                            >
+                                                                {idx + 1}
+                                                            </span>
+                                                            <span className="line-clamp-2">{item}</span>
+                                                        </li>
+                                                    ))}
+                                            </ol>
+                                        </div>
+
+                                        {/* Social Follow Buttons & CTA */}
+                                        <div className="space-y-1.5 pt-1">
+                                            {instagramLink && (
+                                                <div className="w-full py-1.5 px-2.5 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] text-white flex items-center justify-between text-[9px] font-bold shadow-xs">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Instagram size={12} />
+                                                        <span>Follow on Instagram</span>
+                                                    </div>
+                                                    <ArrowRight size={11} />
+                                                </div>
+                                            )}
+                                            {facebookLink && (
+                                                <div className="w-full py-1.5 px-2.5 rounded-xl bg-gradient-to-r from-[#1877F2] to-[#0D65D9] text-white flex items-center justify-between text-[9px] font-bold shadow-xs">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Facebook size={12} />
+                                                        <span>Follow on Facebook</span>
+                                                    </div>
+                                                    <ArrowRight size={11} />
+                                                </div>
+                                            )}
+                                            <button
+                                                type="button"
+                                                className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-400 text-slate-950 font-black text-[11px] flex items-center justify-center gap-1.5 shadow-md"
+                                            >
+                                                <Sparkles size={12} />
+                                                <span>{unlockBtnText || 'Start Game Now'}</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Simulated Header */}
+                                        <div className="text-center pt-2">
+                                            {/* Brand Logo */}
+                                            {logoUrl ? (
+                                                <div className="mb-2 flex justify-center">
+                                                    <img
+                                                        src={logoUrl}
+                                                        alt="Brand Logo"
+                                                        className={`object-contain rounded-lg drop-shadow-md ${
+                                                            logoSize === 'sm' ? 'h-7' : logoSize === 'lg' ? 'h-12' : 'h-9'
+                                                        }`}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <div className="mb-2 flex justify-center">
+                                                    <div
+                                                        style={{ backgroundColor: primaryColor }}
+                                                        className="w-8 h-8 rounded-xl text-white font-black flex items-center justify-center text-xs shadow-md"
+                                                    >
+                                                        {campaign.vendor_name ? campaign.vendor_name.charAt(0).toUpperCase() : '🎁'}
+                                                    </div>
+                                                </div>
+                                            )}
 
                                     {/* Tagline / Badge */}
                                     <div className="flex justify-center mb-1.5">
@@ -1136,8 +1450,10 @@ const CampaignDesignModal = ({ campaign, onClose, onUpdated }) => {
                                         </span>
                                     </div>
                                 </div>
+                            </>
+                        )}
 
-                            </div>
+                    </div>
 
                         </div>
                     </div>

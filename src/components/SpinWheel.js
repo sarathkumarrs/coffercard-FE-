@@ -17,7 +17,7 @@ const CASINO_PALETTE = [
 
 const LED_COUNT = 24;
 
-const SpinWheel = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration }) => {
+const SpinWheel = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegistration, onIpLimitReached }) => {
     const [mustSpin, setMustSpin] = useState(false);
     const [prizeNumber, setPrizeNumber] = useState(0);
     const [spinsLeft, setSpinsLeft] = useState(null);
@@ -116,6 +116,12 @@ const SpinWheel = ({ campaignCode, prizes, onSpinComplete, campaign, onNeedsRegi
             }
 
             if (!response.ok) {
+                if (resData.ip_limit_reached || resData.status === 'ip_limit_reached') {
+                    if (onIpLimitReached) {
+                        onIpLimitReached(resData);
+                        return;
+                    }
+                }
                 if (resData.can_unlock_with_share) {
                     setCanShare(true);
                 }
