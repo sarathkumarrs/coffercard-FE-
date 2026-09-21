@@ -40,6 +40,36 @@ const PrizeModal = ({ campaign, onClose }) => {
         }
     };
 
+    const [isRebalancing, setIsRebalancing] = useState(false);
+
+    const handleRebalancePrizes = async () => {
+        if (!window.confirm('This will automatically scale all prizes so their combined probability equals exactly 100% (with winning odds capped at 85%). Proceed?')) {
+            return;
+        }
+        try {
+            setIsRebalancing(true);
+            const token = localStorage.getItem('access_token');
+            const response = await fetch(`${BASE_URL}/campaigns/${campaign.id}/rebalance_prizes/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => null);
+                throw new Error(errData?.error || 'Failed to rebalance prizes');
+            }
+            await fetchPrizes();
+            setError(null);
+        } catch (err) {
+            console.error('Error rebalancing prizes:', err);
+            setError(err.message);
+        } finally {
+            setIsRebalancing(false);
+        }
+    };
+
     const handleEditClick = (prize) => {
         setEditingPrize(prize.id);
         setNewPrize({
@@ -80,6 +110,12 @@ const PrizeModal = ({ campaign, onClose }) => {
                 return;
             }
 
+            // Check if this is an edit that does not increase probability
+            const editingPrizeObj = prizes.find(p => p.id === editingPrize);
+            const origProb = editingPrizeObj ? (parseFloat(editingPrizeObj.probability) || 0) : null;
+            const origIsWinning = editingPrizeObj ? editingPrizeObj.is_winning : true;
+            const isEditNotIncreasing = editingPrize && origProb !== null && newProb <= origProb && newPrize.is_winning === origIsWinning;
+
             // Winning probability cannot be 100% or higher
             if (newPrize.is_winning && newProb >= 100) {
                 setError('A winning prize cannot have 100% probability. Total winning probability must be strictly less than 100%.');
@@ -91,7 +127,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                 .filter(prize => prize.id !== editingPrize && prize.is_winning)
                 .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
 
-            if (newPrize.is_winning && (currentWinningProbability + newProb >= 100)) {
+            if (newPrize.is_winning && !isEditNotIncreasing && (currentWinningProbability + newProb >= 100)) {
                 setError(`Total winning probability cannot reach or exceed 100%. Current winning: ${currentWinningProbability.toFixed(1)}%, Adding: ${newProb}%. Total would be ${(currentWinningProbability + newProb).toFixed(1)}%. Must leave a margin for non-winning outcomes.`);
                 return;
             }
@@ -101,7 +137,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                 .filter(prize => prize.id !== editingPrize)
                 .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
 
-            if (totalProbability + newProb > 100) {
+            if (!isEditNotIncreasing && (totalProbability + newProb > 100)) {
                 setError(`Total combined probability cannot exceed 100%. Current: ${totalProbability}%, Adding: ${newProb}%`);
                 return;
             }
@@ -235,9 +271,14 @@ const PrizeModal = ({ campaign, onClose }) => {
         .filter(prize => prize.id !== editingPrize && prize.is_winning)
         .reduce((sum, prize) => sum + (parseFloat(prize.probability) || 0), 0);
 
+    const editingPrizeObj = prizes.find(p => p.id === editingPrize);
+    const origProb = editingPrizeObj ? (parseFloat(editingPrizeObj.probability) || 0) : null;
+    const origIsWinning = editingPrizeObj ? editingPrizeObj.is_winning : true;
+    const isEditNotIncreasing = editingPrize && origProb !== null && parseFloat(newPrize.probability || 0) <= origProb && newPrize.is_winning === origIsWinning;
+
     const enteredProbability = parseFloat(newPrize.probability) || 0;
-    const isExceedingTotal = totalProbabilityExcludingEditing + enteredProbability > 100;
-    const isExceedingWinning = newPrize.is_winning && (enteredProbability >= 100 || (winningProbabilityExcludingEditing + enteredProbability >= 100));
+    const isExceedingTotal = !isEditNotIncreasing && (totalProbabilityExcludingEditing + enteredProbability > 100);
+    const isExceedingWinning = newPrize.is_winning && !isEditNotIncreasing && (enteredProbability >= 100 || (winningProbabilityExcludingEditing + enteredProbability >= 100));
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
@@ -294,6 +335,23 @@ const PrizeModal = ({ campaign, onClose }) => {
                         </div>
                     </div>
 
+                    {(totalProbability > 100 || winningProbability >= 100) && (
+                        <div className="bg-amber-50 border border-amber-300 text-amber-900 px-4 py-3 rounded-lg mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div className="text-xs sm:text-sm">
+                                <span className="font-bold">⚠️ Probability Over-allocated:</span> Total is {totalProbability.toFixed(1)}% (Winning: {winningProbability.toFixed(1)}%).
+                                Click Auto-Balance to fit all prizes to 100.0%.
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleRebalancePrizes}
+                                disabled={isRebalancing}
+                                className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm px-3 py-1.5 rounded-md transition-colors whitespace-nowrap self-start sm:self-auto"
+                            >
+                                {isRebalancing ? 'Balancing...' : '⚖️ Auto-Balance to 100%'}
+                            </button>
+                        </div>
+                    )}
+
                     <h3 className="text-lg font-semibold mb-4">Current Prizes</h3>
                     {prizes.length === 0 ? (
                         <div className="text-center text-gray-500 py-4">No prizes added yet</div>
@@ -313,7 +371,16 @@ const PrizeModal = ({ campaign, onClose }) => {
                                         <div className="text-sm text-gray-600">{prize.description}</div>
                                         <div className="text-xs sm:text-sm mt-1 flex items-center gap-3 flex-wrap">
                                             <span>Probability: {prize.probability}%</span>
-                                            {prize.is_winning && prize.quantity > 0 && <span>Quantity: {prize.quantity}</span>}
+                                            {prize.is_winning && (
+                                                <span className="flex items-center gap-1.5 flex-wrap">
+                                                    <span>Qty: <strong>{prize.quantity}</strong></span>
+                                                    <span className="text-blue-700 font-medium">({prize.redeemed_count || 0} redeemed)</span>
+                                                    <span>•</span>
+                                                    <span className={(prize.remaining_quantity ?? prize.quantity) > 0 ? "text-emerald-700 font-semibold" : "text-red-600 font-bold"}>
+                                                        {(prize.remaining_quantity ?? prize.quantity) > 0 ? `${prize.remaining_quantity ?? prize.quantity} left` : "Exhausted"}
+                                                    </span>
+                                                </span>
+                                            )}
                                             {prize.coupon_code && (
                                                 <span className="font-mono text-xs font-bold bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded border border-indigo-200">
                                                     🎟️ {prize.coupon_code}
