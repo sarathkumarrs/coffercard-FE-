@@ -83,15 +83,15 @@ const Logo = ({ size = "md", theme = "light", showText = true, monochrome = fals
     const isDark = theme === "dark";
 
     const iconSizes = {
-        sm: "w-7 h-7",
-        md: "w-9 h-9 sm:w-10 sm:h-10",
-        lg: "w-12 h-12"
+        sm: "w-9 h-9",
+        md: "w-11 h-11 sm:w-12 sm:h-12",
+        lg: "w-14 h-14 sm:w-16 sm:h-16"
     };
 
     const textSizes = {
-        sm: "text-lg font-bold",
-        md: "text-xl sm:text-2xl font-black",
-        lg: "text-2xl sm:text-3xl font-black"
+        sm: "text-xl font-extrabold",
+        md: "text-2xl sm:text-3xl font-black",
+        lg: "text-3xl sm:text-4xl font-black"
     };
 
     return (

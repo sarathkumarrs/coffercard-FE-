@@ -122,3 +122,38 @@
 .shadow-supercard-hover:hover {
   box-shadow: 0 28px 50px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
 }
+
+/* Soft Linear Gradient Buttons: White sheen ➔ Gentle Golden Honey */
+.btn-soft-amber {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FEF3C7 35%, #FDE68A 75%, #F59E0B 100%);
+  color: #0F172A;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-soft-amber:hover {
+  background: linear-gradient(180deg, #FFFFFF 0%, #FDE68A 45%, #F59E0B 100%);
+  border-color: rgba(217, 119, 6, 0.5);
+  box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.32), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.btn-soft-amber:active {
+  transform: translateY(0px) scale(0.99);
+}
+
+/* Soft Slate Dark Action Button */
+.btn-soft-dark {
+  background: linear-gradient(180deg, #1E293B 0%, #0F172A 100%);
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 14px 0 rgba(15, 23, 42, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-soft-dark:hover {
+  background: linear-gradient(180deg, #334155 0%, #0F172A 100%);
+  box-shadow: 0 6px 20px 0 rgba(15, 23, 42, 0.35);
+  transform: translateY(-1px) scale(1.02);
+}
