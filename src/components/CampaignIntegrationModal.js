@@ -128,52 +128,52 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                 </div>
 
                 {/* Mode Selector Tabs */}
-                <div className="flex border-b border-slate-100 px-6 bg-white gap-2 font-brand-outfit">
+                <div className="flex border-b border-slate-100 px-3 sm:px-6 bg-white gap-1 sm:gap-2 font-brand-outfit overflow-x-auto no-scrollbar">
                     <button
                         onClick={() => setActiveTab('website')}
-                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm border-b-2 whitespace-nowrap transition-all ${
                             activeTab === 'website'
                                 ? 'border-amber-500 text-slate-900'
                                 : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <Globe size={17} className={activeTab === 'website' ? 'text-amber-500' : ''} />
+                        <Globe size={16} className={activeTab === 'website' ? 'text-amber-500' : ''} />
                         Website Integration
-                        <span className="bg-amber-500/15 text-amber-800 text-[11px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">
+                        <span className="hidden xs:inline-block bg-amber-500/15 text-amber-800 text-[10px] sm:text-[11px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border border-amber-500/20">
                             Online
                         </span>
                     </button>
 
                     <button
                         onClick={() => setActiveTab('qr')}
-                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm border-b-2 whitespace-nowrap transition-all ${
                             activeTab === 'qr'
                                 ? 'border-amber-500 text-slate-900'
                                 : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <QrCode size={17} className={activeTab === 'qr' ? 'text-amber-500' : ''} />
-                        In-Store QR Code
-                        <span className="bg-emerald-50 text-emerald-700 text-[11px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
+                        <QrCode size={16} className={activeTab === 'qr' ? 'text-amber-500' : ''} />
+                        In-Store QR
+                        <span className="hidden xs:inline-block bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-black px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-200">
                             Physical
                         </span>
                     </button>
 
                     <button
                         onClick={() => setActiveTab('preview')}
-                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-1.5 sm:gap-2 py-3 sm:py-3.5 px-2.5 sm:px-4 font-bold text-xs sm:text-sm border-b-2 whitespace-nowrap transition-all ${
                             activeTab === 'preview'
                                 ? 'border-amber-500 text-slate-900'
                                 : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <Eye size={17} className={activeTab === 'preview' ? 'text-amber-500' : ''} />
+                        <Eye size={16} className={activeTab === 'preview' ? 'text-amber-500' : ''} />
                         Live Preview
                     </button>
                 </div>
 
                 {/* Content Area */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
 
                     {/* ======================================================== */}
                     {/* TAB 1: WEBSITE INTEGRATION */}
