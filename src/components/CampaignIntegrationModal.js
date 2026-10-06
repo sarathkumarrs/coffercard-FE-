@@ -104,23 +104,23 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
             <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
                 
                 {/* Modal Header */}
-                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/70 font-brand-outfit">
                     <div>
                         <div className="flex items-center gap-2">
-                            <span className="p-1.5 bg-indigo-100 text-indigo-600 rounded-lg">
+                            <span className="p-1.5 bg-amber-500/15 text-amber-600 rounded-xl border border-amber-500/20">
                                 <Sparkles size={18} />
                             </span>
-                            <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                            <h2 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
                                 Launch & Integrate Campaign
                             </h2>
                         </div>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
-                            {campaign.name} • <span className="capitalize font-medium text-indigo-600">{campaign.campaign_type} Game</span>
+                        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                            {campaign.name} • <span className="capitalize font-bold text-amber-600">{campaign.campaign_type} Game</span>
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="text-slate-400 hover:text-slate-600 p-2 rounded-xl hover:bg-slate-100 transition-colors"
                         aria-label="Close"
                     >
                         <X size={20} />
@@ -128,46 +128,46 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                 </div>
 
                 {/* Mode Selector Tabs */}
-                <div className="flex border-b border-gray-200 px-6 bg-white gap-2">
+                <div className="flex border-b border-slate-100 px-6 bg-white gap-2 font-brand-outfit">
                     <button
                         onClick={() => setActiveTab('website')}
-                        className={`flex items-center gap-2 py-3 px-4 font-semibold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
                             activeTab === 'website'
-                                ? 'border-indigo-600 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-800'
+                                ? 'border-amber-500 text-slate-900'
+                                : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <Globe size={17} />
+                        <Globe size={17} className={activeTab === 'website' ? 'text-amber-500' : ''} />
                         Website Integration
-                        <span className="bg-indigo-50 text-indigo-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-amber-500/15 text-amber-800 text-[11px] font-black px-2 py-0.5 rounded-full border border-amber-500/20">
                             Online
                         </span>
                     </button>
 
                     <button
                         onClick={() => setActiveTab('qr')}
-                        className={`flex items-center gap-2 py-3 px-4 font-semibold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
                             activeTab === 'qr'
-                                ? 'border-indigo-600 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-800'
+                                ? 'border-amber-500 text-slate-900'
+                                : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <QrCode size={17} />
+                        <QrCode size={17} className={activeTab === 'qr' ? 'text-amber-500' : ''} />
                         In-Store QR Code
-                        <span className="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-emerald-50 text-emerald-700 text-[11px] font-black px-2 py-0.5 rounded-full border border-emerald-200">
                             Physical
                         </span>
                     </button>
 
                     <button
                         onClick={() => setActiveTab('preview')}
-                        className={`flex items-center gap-2 py-3 px-4 font-semibold text-sm border-b-2 transition-all ${
+                        className={`flex items-center gap-2 py-3.5 px-4 font-bold text-sm border-b-2 transition-all ${
                             activeTab === 'preview'
-                                ? 'border-indigo-600 text-indigo-600'
-                                : 'border-transparent text-gray-500 hover:text-gray-800'
+                                ? 'border-amber-500 text-slate-900'
+                                : 'border-transparent text-slate-400 hover:text-slate-700'
                         }`}
                     >
-                        <Eye size={17} />
+                        <Eye size={17} className={activeTab === 'preview' ? 'text-amber-500' : ''} />
                         Live Preview
                     </button>
                 </div>
@@ -181,25 +181,25 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                     {activeTab === 'website' && (
                         <div className="space-y-6">
                             {/* Environment Selector */}
-                            <div className="p-3.5 bg-indigo-50/80 border border-indigo-100 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div className="p-3.5 bg-amber-50/60 border border-amber-200/60 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div>
-                                    <span className="text-xs font-bold text-indigo-950 flex items-center gap-1.5">
+                                    <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5 font-brand-outfit">
                                         🎯 Target Integration Domain:
                                     </span>
-                                    <p className="text-[11px] text-indigo-700 mt-0.5">
+                                    <p className="text-[11px] text-slate-600 mt-0.5">
                                         {embedEnv === 'local'
                                             ? `Configured for local testing on ${window.location.host}`
                                             : 'Configured for live website deployment on coffercard.com'}
                                     </p>
                                 </div>
-                                <div className="inline-flex bg-white p-1 rounded-lg border border-indigo-200 self-start sm:self-auto shadow-xs">
+                                <div className="inline-flex bg-white p-1 rounded-full border border-slate-200 self-start sm:self-auto shadow-xs">
                                     <button
                                         type="button"
                                         onClick={() => setEmbedEnv('local')}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                                        className={`px-3 py-1.5 rounded-full text-xs font-black transition-all ${
                                             embedEnv === 'local'
-                                                ? 'bg-indigo-600 text-white shadow-xs'
-                                                : 'text-gray-600 hover:text-gray-900'
+                                                ? 'btn-soft-amber shadow-xs'
+                                                : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >
                                         💻 Localhost ({window.location.host})
@@ -207,10 +207,10 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={() => setEmbedEnv('production')}
-                                        className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all ${
+                                        className={`px-3 py-1.5 rounded-full text-xs font-black transition-all ${
                                             embedEnv === 'production'
-                                                ? 'bg-indigo-600 text-white shadow-xs'
-                                                : 'text-gray-600 hover:text-gray-900'
+                                                ? 'btn-soft-amber shadow-xs'
+                                                : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                     >
                                         🚀 Live (coffercard.com)
@@ -227,17 +227,17 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={() => setDisplayStyle('bubble')}
-                                        className={`p-3.5 rounded-xl border text-left transition-all ${
+                                        className={`p-3.5 rounded-2xl border text-left transition-all ${
                                             displayStyle === 'bubble'
-                                                ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20 shadow-sm'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-amber-400 bg-amber-50/50 ring-2 ring-amber-400/30 shadow-sm'
+                                                : 'border-slate-200 hover:border-slate-300 bg-white'
                                         }`}
                                     >
-                                        <div className="flex items-center gap-2 font-semibold text-sm text-gray-900 mb-1">
-                                            <MousePointerClick size={16} className="text-indigo-600" />
+                                        <div className="flex items-center gap-2 font-bold text-sm text-slate-900 mb-1">
+                                            <MousePointerClick size={16} className="text-amber-600" />
                                             Floating Bubble
                                         </div>
-                                        <p className="text-xs text-gray-500 leading-relaxed">
+                                        <p className="text-xs text-slate-500 leading-relaxed">
                                             A stylish launcher button in the corner that opens on click.
                                         </p>
                                     </button>
@@ -245,17 +245,17 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={() => setDisplayStyle('auto')}
-                                        className={`p-3.5 rounded-xl border text-left transition-all ${
+                                        className={`p-3.5 rounded-2xl border text-left transition-all ${
                                             displayStyle === 'auto'
-                                                ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20 shadow-sm'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-amber-400 bg-amber-50/50 ring-2 ring-amber-400/30 shadow-sm'
+                                                : 'border-slate-200 hover:border-slate-300 bg-white'
                                         }`}
                                     >
-                                        <div className="flex items-center gap-2 font-semibold text-sm text-gray-900 mb-1">
-                                            <Clock size={16} className="text-indigo-600" />
+                                        <div className="flex items-center gap-2 font-bold text-sm text-slate-900 mb-1">
+                                            <Clock size={16} className="text-amber-600" />
                                             Timed Auto-Popup
                                         </div>
-                                        <p className="text-xs text-gray-500 leading-relaxed">
+                                        <p className="text-xs text-slate-500 leading-relaxed">
                                             Automatically pops up after 5 seconds to capture visitor attention.
                                         </p>
                                     </button>
@@ -263,17 +263,17 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={() => setDisplayStyle('iframe')}
-                                        className={`p-3.5 rounded-xl border text-left transition-all ${
+                                        className={`p-3.5 rounded-2xl border text-left transition-all ${
                                             displayStyle === 'iframe'
-                                                ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20 shadow-sm'
-                                                : 'border-gray-200 hover:border-gray-300 bg-white'
+                                                ? 'border-amber-400 bg-amber-50/50 ring-2 ring-amber-400/30 shadow-sm'
+                                                : 'border-slate-200 hover:border-slate-300 bg-white'
                                         }`}
                                     >
-                                        <div className="flex items-center gap-2 font-semibold text-sm text-gray-900 mb-1">
-                                            <Layers size={16} className="text-indigo-600" />
+                                        <div className="flex items-center gap-2 font-bold text-sm text-slate-900 mb-1">
+                                            <Layers size={16} className="text-amber-600" />
                                             Inline Iframe
                                         </div>
-                                        <p className="text-xs text-gray-500 leading-relaxed">
+                                        <p className="text-xs text-slate-500 leading-relaxed">
                                             Embeds seamlessly inside any existing page or blog section.
                                         </p>
                                     </button>
@@ -344,10 +344,10 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                             key={plat.id}
                                             type="button"
                                             onClick={() => setSelectedPlatform(plat.id)}
-                                            className={`py-2 px-3 rounded-lg border font-medium text-xs flex items-center justify-center gap-1.5 transition-all ${
+                                            className={`py-2 px-3 rounded-xl border font-bold text-xs flex items-center justify-center gap-1.5 transition-all ${
                                                 selectedPlatform === plat.id
-                                                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700 font-bold shadow-xs'
-                                                    : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                    ? 'border-amber-400 bg-amber-50/70 text-slate-900 ring-2 ring-amber-400/20 shadow-xs'
+                                                    : 'border-slate-200 text-slate-600 hover:bg-slate-50'
                                             }`}
                                         >
                                             <span>{plat.icon}</span>
@@ -390,10 +390,10 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     <button
                                         type="button"
                                         onClick={() => handleCopy(getEmbedSnippet())}
-                                        className={`flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg transition-all ${
+                                        className={`flex items-center gap-1.5 text-xs font-black px-4 py-2 rounded-full transition-all shadow-sm ${
                                             copied
                                                 ? 'bg-emerald-600 text-white'
-                                                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'
+                                                : 'btn-soft-amber'
                                         }`}
                                     >
                                         {copied ? <Check size={14} /> : <Copy size={14} />}
@@ -401,7 +401,7 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     </button>
                                 </div>
                                 <div className="relative">
-                                    <pre className="p-4 bg-gray-900 text-gray-100 rounded-xl font-mono text-xs overflow-x-auto leading-relaxed border border-gray-800">
+                                    <pre className="p-4 bg-slate-900 text-slate-100 rounded-2xl font-mono text-xs overflow-x-auto leading-relaxed border border-slate-800">
                                         <code>{getEmbedSnippet()}</code>
                                     </pre>
                                 </div>
@@ -414,7 +414,7 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                     {/* ======================================================== */}
                     {activeTab === 'qr' && (
                         <div className="flex flex-col items-center py-2 space-y-6">
-                            <div className="bg-white p-5 rounded-2xl shadow-md border border-gray-100 flex flex-col items-center">
+                            <div className="bg-white p-6 rounded-[28px] shadow-supercard border border-slate-100 flex flex-col items-center">
                                 <QRCodeSVG
                                     value={campaignUrl}
                                     size={240}
@@ -422,7 +422,7 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                                     level="H"
                                     includeMargin={true}
                                 />
-                                <span className="mt-2 text-xs font-semibold text-gray-500 tracking-wider uppercase">
+                                <span className="mt-3 text-xs font-bold text-slate-400 tracking-wider uppercase font-brand-outfit">
                                     Scan to Play Instantly
                                 </span>
                             </div>
@@ -431,14 +431,14 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                             <div className="flex flex-wrap justify-center gap-3 w-full max-w-sm">
                                 <button
                                     onClick={() => downloadQR('png')}
-                                    className="flex-1 min-w-[130px] flex items-center justify-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:bg-indigo-700 transition-colors shadow-sm"
+                                    className="flex-1 min-w-[130px] flex items-center justify-center gap-2 px-5 py-2.5 btn-soft-amber rounded-full text-xs font-black transition-all shadow-sm"
                                 >
                                     <Download size={15} />
                                     Download PNG
                                 </button>
                                 <button
                                     onClick={() => downloadQR('svg')}
-                                    className="flex-1 min-w-[130px] flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition-colors shadow-sm"
+                                    className="flex-1 min-w-[130px] flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition-all shadow-sm border border-slate-200"
                                 >
                                     <Download size={15} />
                                     Download SVG
@@ -603,11 +603,11 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                 </div>
 
                 {/* Modal Footer */}
-                <div className="flex justify-end gap-3 px-6 py-3.5 border-t border-gray-100 bg-gray-50">
+                <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-slate-50/70 font-brand-outfit">
                     <button
                         type="button"
                         onClick={onClose}
-                        className="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-gray-800 rounded-lg hover:bg-gray-100 transition-colors"
+                        className="px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-900 rounded-full hover:bg-slate-200/60 transition-colors"
                     >
                         Close
                     </button>
@@ -615,7 +615,11 @@ const CampaignIntegrationModal = ({ campaign, onClose }) => {
                         <button
                             type="button"
                             onClick={() => handleCopy(getEmbedSnippet())}
-                            className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm flex items-center gap-1.5"
+                            className={`px-6 py-2.5 rounded-full text-xs font-black transition-all shadow-sm flex items-center gap-1.5 ${
+                                copied
+                                    ? 'bg-emerald-600 text-white'
+                                    : 'btn-soft-amber'
+                            }`}
                         >
                             {copied ? <Check size={14} /> : <Copy size={14} />}
                             {copied ? 'Copied Code!' : 'Copy Embed Code'}

@@ -668,6 +668,7 @@ const PublicCampaignPage = () => {
 
             {needsUserDetails ? (
                 <UserRegistrationModal
+                    campaign={campaign}
                     onSubmit={handleUserSubmit}
                     onClose={() => campaign.is_in_store ? null : setNeedsUserDetails(false)}
                 />
