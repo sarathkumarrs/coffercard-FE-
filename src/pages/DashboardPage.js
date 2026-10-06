@@ -202,7 +202,7 @@ const DashboardPage = () => {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => navigate('/campaigns')}
-                        className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-full btn-soft-amber font-black text-xs sm:text-sm font-brand-outfit transition-all shadow-md flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4" /> Create Campaign
                     </button>
@@ -323,7 +323,7 @@ const DashboardPage = () => {
                         </p>
                         <button
                             onClick={() => navigate('/campaigns')}
-                            className="px-5 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md"
+                            className="px-5 py-2.5 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-all shadow-md"
                         >
                             + Create Campaign
                         </button>
@@ -542,7 +542,7 @@ const DashboardPage = () => {
                                             {!claim.is_redeemed ? (
                                                 <button
                                                     onClick={() => handleMarkRedeemed(claim.id)}
-                                                    className="px-3.5 py-1.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-all shadow-sm"
+                                                    className="px-3.5 py-1.5 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-all shadow-sm"
                                                 >
                                                     Mark Redeemed ✓
                                                 </button>
@@ -638,7 +638,7 @@ const DownloadModal = ({ isOpen, onClose, onDownload, campaignName }) => {
                         <button
                             type="button"
                             onClick={() => onDownload(dateRange)}
-                            className="flex-1 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md"
+                            className="flex-1 py-3 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-all shadow-md"
                         >
                             Download Excel
                         </button>

@@ -164,7 +164,7 @@ const ResetPasswordPage = () => {
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                                className="w-full py-3.5 rounded-full btn-soft-amber font-black text-sm font-brand-outfit transition-all shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
                             >
                                 {isSubmitting ? 'Saving...' : 'Update Password'} <ArrowRight className="w-4 h-4" />
                             </button>

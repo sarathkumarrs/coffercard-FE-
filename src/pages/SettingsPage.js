@@ -269,7 +269,7 @@ const SettingsPage = () => {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+                        className="px-8 py-3.5 rounded-full btn-soft-amber font-black text-sm font-brand-outfit transition-all shadow-md hover:scale-105 disabled:opacity-50 flex items-center gap-2"
                     >
                         {saving ? (
                             <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />

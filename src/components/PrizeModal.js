@@ -547,7 +547,7 @@ const PrizeModal = ({ campaign, onClose }) => {
                             )}
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-sm sm:text-base"
+                                className="btn-soft-amber font-black px-5 py-2.5 rounded-full disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm font-brand-outfit shadow-sm"
                                 disabled={
                                     !newPrize.name.trim() ||
                                     !newPrize.probability ||

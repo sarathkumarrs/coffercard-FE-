@@ -285,7 +285,7 @@ const CampaignsPage = () => {
                 <div>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 flex items-center gap-2"
+                        className="px-6 py-3 rounded-full btn-soft-amber font-black text-xs sm:text-sm font-brand-outfit transition-all shadow-md flex items-center gap-2"
                     >
                         <Plus className="w-4 h-4" /> Create New Campaign
                     </button>
@@ -306,7 +306,7 @@ const CampaignsPage = () => {
                     </p>
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-colors shadow-md"
+                        className="px-6 py-3 rounded-full btn-soft-amber font-black text-sm font-brand-outfit transition-all shadow-md"
                     >
                         Create Your First Campaign
                     </button>
@@ -413,7 +413,7 @@ const CampaignsPage = () => {
                                             <div className="grid grid-cols-3 gap-2">
                                                 <button
                                                     onClick={() => setSelectedCampaignForQR(campaign)}
-                                                    className="col-span-2 py-2.5 px-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                                                    className="col-span-2 py-2.5 px-3 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-all flex items-center justify-center gap-1.5 shadow-sm"
                                                 >
                                                     <QrCode className="w-3.5 h-3.5" /> Standee & QR
                                                 </button>
@@ -656,7 +656,7 @@ const CampaignsPage = () => {
                                 form="createCampaignForm"
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
+                                className="px-6 py-2.5 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Creating...' : 'Create Campaign'}
                             </button>
@@ -865,7 +865,7 @@ const CampaignsPage = () => {
                                 form="editCampaignForm"
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
+                                className="px-6 py-2.5 rounded-full btn-soft-amber font-black text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
                             >
                                 {isSubmitting ? 'Saving...' : 'Save Changes'}
                             </button>

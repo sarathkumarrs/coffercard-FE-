@@ -58,7 +58,7 @@ const RenewalModal = ({ isOpen, onClose }) => {
                 <div className="flex gap-3">
                     <a
                         href="tel:7034714831"
-                        className="flex-1 py-3 px-4 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-colors shadow-md text-center flex items-center justify-center gap-1.5"
+                        className="flex-1 py-3 px-4 rounded-full btn-soft-amber font-black text-sm font-brand-outfit text-center flex items-center justify-center gap-1.5"
                     >
                         <Phone className="w-4 h-4" /> Call Now
                     </a>
@@ -116,7 +116,7 @@ const ExpiredAccessOverlay = ({ accessStatus, onRenewClick, onLogout }) => {
                 <div className="flex gap-3">
                     <button
                         onClick={onRenewClick}
-                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 py-3.5 px-4 rounded-full transition-colors font-extrabold text-sm font-brand-outfit shadow-md flex items-center justify-center gap-2"
+                        className="flex-1 btn-soft-amber py-3.5 px-4 rounded-full font-black text-sm font-brand-outfit flex items-center justify-center gap-2"
                     >
                         <Phone className="w-4 h-4" />
                         Call to Renew

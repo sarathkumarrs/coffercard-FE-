@@ -271,13 +271,13 @@ const SignupForm = () => {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 hover:scale-[1.02] transform active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="w-full py-3.5 rounded-full btn-soft-amber font-black text-sm font-brand-outfit disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
                             ) : (
                                 <>
-                                    Create Free Store Account <ArrowRight className="w-4 h-4" />
+                                    Create Free Store Account <ArrowRight className="w-4 h-4 stroke-[2.5]" />
                                 </>
                             )}
                         </button>
