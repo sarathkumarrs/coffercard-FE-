@@ -1,7 +1,26 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Zap, Users, TrendingUp, Sparkles, QrCode } from 'lucide-react';
+import { 
+    QrCode, 
+    Gift, 
+    Sparkles, 
+    ArrowRight, 
+    CheckCircle2, 
+    Play, 
+    Users, 
+    TrendingUp, 
+    Heart, 
+    Sliders, 
+    Share2, 
+    Gamepad2, 
+    Ticket, 
+    ChevronRight,
+    Zap,
+    Store
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { QRCodeSVG } from 'qrcode.react';
+import Logo, { CoffeeCupIcon } from '../components/Logo';
 
 const LandingPage = () => {
     const navigate = useNavigate();
@@ -14,242 +33,756 @@ const LandingPage = () => {
         }
     }, [user, loading, navigate]);
 
-    // Show loading spinner while checking auth
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 via-white to-blue-50">
+            <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Loading...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+                    <p className="text-slate-600 font-brand-sans font-medium">Loading CofferCard...</p>
                 </div>
             </div>
         );
     }
 
+    const featureItems = [
+        {
+            id: 'qr',
+            title: 'QR Code Integration',
+            description: 'Generate QR codes for offline campaigns. Bridge physical and digital marketing seamlessly.',
+            icon: QrCode,
+            badge: 'In-Store Scan',
+            bg: 'bg-amber-50',
+            text: 'text-amber-700',
+            border: 'border-amber-100'
+        },
+        {
+            id: 'instore',
+            title: 'In-Store Mode',
+            description: 'Perfect for retail locations. Collect customer data with every interaction for better insights.',
+            icon: Users,
+            badge: 'Point of Sale',
+            bg: 'bg-orange-50',
+            text: 'text-orange-700',
+            border: 'border-orange-100'
+        },
+        {
+            id: 'analytics',
+            title: 'Real-Time Analytics',
+            description: 'Track engagement, claims, and conversions. Make data-driven decisions with detailed insights.',
+            icon: TrendingUp,
+            badge: 'Live Insights',
+            bg: 'bg-sky-50',
+            text: 'text-sky-700',
+            border: 'border-sky-100'
+        },
+        {
+            id: 'probability',
+            title: 'Smart Probability',
+            description: 'Control win rates with precision. Balance excitement with budget using probability-based distribution.',
+            icon: Sliders,
+            badge: 'Algorithmic',
+            bg: 'bg-purple-50',
+            text: 'text-purple-700',
+            border: 'border-purple-100'
+        },
+        {
+            id: 'prizes',
+            title: 'Prize Management',
+            description: 'Easily configure prizes, track redemptions, and manage inventory all in one place.',
+            icon: Gift,
+            badge: 'Inventory Control',
+            bg: 'bg-rose-50',
+            text: 'text-rose-700',
+            border: 'border-rose-100'
+        },
+        {
+            id: 'social',
+            title: 'Social Integration',
+            description: 'Unlock extra plays with social sharing. Grow your social media presence organically.',
+            icon: Share2,
+            badge: 'Organic Growth',
+            bg: 'bg-indigo-50',
+            text: 'text-indigo-700',
+            border: 'border-indigo-100'
+        }
+    ];
+
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
-            {/* Navigation */}
-            <nav className="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        {/* Logo */}
-                        <div className="flex items-center space-x-2">
-                            <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-1.5 sm:p-2 rounded-lg">
-                                <Gift className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                            </div>
-                            <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                                CofferCard
-                            </span>
-                        </div>
+        <div className="min-h-screen bg-[#FAF8F5] font-brand-sans text-slate-900 selection:bg-amber-200 selection:text-amber-950">
+            {/* AMBIENT BACKGROUND GLOW (SOFT HONEY & WARM ALABASTER LIGHT) */}
+            <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+                <div className="absolute -top-32 right-1/4 w-[600px] h-[600px] bg-amber-100/40 rounded-full blur-3xl" />
+                <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-orange-100/30 rounded-full blur-3xl" />
+                <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-amber-50/50 rounded-full blur-3xl" />
+            </div>
 
-                        {/* Auth Buttons */}
-                        <div className="flex items-center space-x-2 sm:space-x-4">
-                            <button
-                                onClick={() => navigate('/login')}
-                                className="px-3 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base text-gray-700 hover:text-purple-600 font-medium transition-colors"
-                            >
-                                Login
-                            </button>
-                            <button
-                                onClick={() => navigate('/signup')}
-                                className="px-3 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 font-medium shadow-lg hover:shadow-xl transition-all"
-                            >
-                                Get Started
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
-            {/* Hero Section */}
-            <section className="pt-24 sm:pt-32 pb-12 sm:pb-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="inline-flex items-center space-x-2 bg-purple-100 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full mb-6 sm:mb-8">
-                        <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-purple-600" />
-                        <span className="text-xs sm:text-sm font-medium text-purple-600">Gamified Marketing Platform</span>
+            {/* TOP NAVIGATION BAR */}
+            <header className="relative z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6">
+                <div className="flex items-center justify-between h-16">
+                    {/* Steaming Coffee Cup with Star Logo */}
+                    <div onClick={() => navigate('/')}>
+                        <Logo theme="light" size="md" />
                     </div>
 
-                    <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-4 sm:mb-6 px-4">
-                        Turn Customer Engagement
-                        <br />
-                        <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                            Into Winning Moments
-                        </span>
-                    </h1>
-
-                    <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-8 sm:mb-10 max-w-3xl mx-auto px-4">
-                        Create interactive scratch cards and spin-the-wheel campaigns that captivate your customers,
-                        grow your audience, and drive real results.
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 px-4">
-                        <button
-                            onClick={() => navigate('/signup')}
-                            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 font-semibold text-base sm:text-lg shadow-2xl hover:shadow-purple-500/50 transition-all transform hover:scale-105"
-                        >
-                            Start Free Trial
+                    {/* Middle Nav Links */}
+                    <nav className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
+                        <a href="#how-it-works" className="hover:text-slate-900 transition-colors">
+                            How It Works
+                        </a>
+                        <a href="#games" className="hover:text-slate-900 transition-colors">
+                            Game Formats
+                        </a>
+                        <a href="#features" className="hover:text-slate-900 transition-colors">
+                            Features
+                        </a>
+                        <button onClick={() => navigate('/signup')} className="hover:text-slate-900 transition-colors">
+                            Pricing
                         </button>
+                    </nav>
+
+                    {/* Right Side Actions */}
+                    <div className="flex items-center gap-3 sm:gap-4">
                         <button
                             onClick={() => navigate('/login')}
-                            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-white text-gray-700 rounded-xl hover:bg-gray-50 font-semibold text-base sm:text-lg border-2 border-gray-200 hover:border-purple-300 transition-all"
+                            className="px-4 py-2 text-sm font-bold text-slate-700 hover:text-slate-900 transition-colors"
                         >
-                            View Demo
+                            Login
                         </button>
-                    </div>
-
-                    {/* Hero Illustration */}
-                    <div className="mt-12 sm:mt-16 relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 blur-3xl"></div>
-                        <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-4xl mx-auto border border-gray-200">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                                <div className="bg-gradient-to-br from-purple-100 to-purple-50 rounded-lg sm:rounded-xl p-4 sm:p-6 text-left">
-                                    <div className="bg-purple-600 w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                                        <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                                    </div>
-                                    <h3 className="font-bold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Scratch Cards</h3>
-                                    <p className="text-xs sm:text-sm text-gray-600">Interactive scratch-off games that reveal instant prizes</p>
-                                </div>
-                                <div className="bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg sm:rounded-xl p-4 sm:p-6 text-left">
-                                    <div className="bg-blue-600 w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
-                                        <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                                    </div>
-                                    <h3 className="font-bold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Spin & Win</h3>
-                                    <p className="text-xs sm:text-sm text-gray-600">Exciting wheel spinner with customizable prizes</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Features Section */}
-            <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-12 sm:mb-16">
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-                            Everything You Need to Succeed
-                        </h2>
-                        <p className="text-base sm:text-lg md:text-xl text-gray-600">
-                            Powerful features designed for modern marketers
-                        </p>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-                        {/* Feature 1 */}
-                        <div className="bg-gradient-to-br from-purple-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-purple-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-purple-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <QrCode className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">QR Code Integration</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Generate QR codes for offline campaigns. Bridge physical and digital marketing seamlessly.
-                            </p>
-                        </div>
-
-                        {/* Feature 2 */}
-                        <div className="bg-gradient-to-br from-blue-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-blue-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-blue-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <Users className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">In-Store Mode</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Perfect for retail locations. Collect customer data with every interaction for better insights.
-                            </p>
-                        </div>
-
-                        {/* Feature 3 */}
-                        <div className="bg-gradient-to-br from-green-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-green-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-green-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Real-Time Analytics</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Track engagement, claims, and conversions. Make data-driven decisions with detailed insights.
-                            </p>
-                        </div>
-
-                        {/* Feature 4 */}
-                        <div className="bg-gradient-to-br from-orange-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-orange-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-orange-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <Sparkles className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Smart Probability</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Control win rates with precision. Balance excitement with budget using probability-based distribution.
-                            </p>
-                        </div>
-
-                        {/* Feature 5 */}
-                        <div className="bg-gradient-to-br from-pink-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-pink-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-pink-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <Gift className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Prize Management</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Easily configure prizes, track redemptions, and manage inventory all in one place.
-                            </p>
-                        </div>
-
-                        {/* Feature 6 */}
-                        <div className="bg-gradient-to-br from-indigo-50 to-white p-6 sm:p-8 rounded-xl sm:rounded-2xl border border-indigo-100 hover:shadow-xl transition-shadow">
-                            <div className="bg-indigo-600 w-12 h-12 sm:w-14 sm:h-14 rounded-xl flex items-center justify-center mb-4 sm:mb-6">
-                                <Zap className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
-                            </div>
-                            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">Social Integration</h3>
-                            <p className="text-sm sm:text-base text-gray-600">
-                                Unlock extra plays with social sharing. Grow your social media presence organically.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto text-center">
-                    <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl sm:rounded-3xl p-8 sm:p-12 shadow-2xl">
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-                            Ready to Transform Your Marketing?
-                        </h2>
-                        <p className="text-base sm:text-lg md:text-xl text-purple-100 mb-6 sm:mb-8">
-                            Join hundreds of businesses creating unforgettable customer experiences
-                        </p>
                         <button
                             onClick={() => navigate('/signup')}
-                            className="w-full sm:w-auto px-8 sm:px-10 py-3 sm:py-4 bg-white text-purple-600 rounded-xl hover:bg-gray-50 font-bold text-base sm:text-lg shadow-xl transition-all transform hover:scale-105"
+                            className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold transition-all shadow-sm hover:shadow-md hover:scale-105 transform flex items-center gap-1.5"
                         >
-                            Create Your First Campaign
+                            Create Campaign <ArrowRight className="w-4 h-4 text-amber-400" />
                         </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* HERO SECTION (MATCHING USER SUGGESTION MOCKUP WITH SOFT LIGHT PALETTE) */}
+            <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-16 lg:pb-24">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                    
+                    {/* LEFT COLUMN: HERO HEADLINE & CTAS */}
+                    <div className="lg:col-span-5 text-left">
+                        {/* Pill Badge */}
+                        <div className="inline-flex items-center gap-2 bg-amber-50 border border-amber-200/80 px-3.5 py-1.5 rounded-full text-amber-800 text-xs font-bold mb-6">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                            Gamified Marketing Platform
+                        </div>
+
+                        {/* Title with Soft Amber Highlight on "Winning Moments." */}
+                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black font-brand-outfit tracking-tight leading-[1.08] text-slate-900">
+                            Turn Customer<br />
+                            Engagement Into<br />
+                            <span className="text-[#D97706]">Winning Moments.</span>
+                        </h1>
+
+                        {/* Subtitle */}
+                        <p className="mt-6 text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-normal">
+                            Create interactive scratch cards, spin-the-wheel campaigns, coupons and rewards that captivate your customers, grow your audience, and drive real results.
+                        </p>
+
+                        {/* Action Buttons */}
+                        <div className="mt-8 flex flex-wrap items-center gap-3.5">
+                            <button
+                                onClick={() => navigate('/signup')}
+                                className="px-7 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm sm:text-base font-brand-outfit transition-all shadow-md shadow-amber-500/20 hover:scale-105 transform flex items-center gap-2"
+                            >
+                                Create Campaign <ArrowRight className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => navigate('/login')}
+                                className="px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base font-brand-outfit transition-all shadow-xs hover:border-slate-300 flex items-center gap-2"
+                            >
+                                <Play className="w-4 h-4 fill-slate-800 text-slate-800" /> View Demo
+                            </button>
+                        </div>
+
+                        {/* Trust Checkmarks */}
+                        <div className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs font-bold text-slate-600">
+                            <div className="flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                                <span>No credit card required</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                                <span>Easy to set up</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <CheckCircle2 className="w-4 h-4 text-amber-600" />
+                                <span>Works for any business</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: 3D PERSPECTIVE DASHBOARD PREVIEW + FLOATING CARDS */}
+                    <div className="lg:col-span-7 relative">
+                        {/* 1. TOP-LEFT FLOATING CARD: SCRATCH & WIN */}
+                        <div className="absolute -top-6 -left-4 sm:-left-8 z-30 animate-float-tilt-left">
+                            <div className="bg-white rounded-2xl p-3.5 shadow-sticker border border-purple-100 flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                    <Zap className="w-5 h-5 text-white" />
+                                </div>
+                                <div className="text-left">
+                                    <span className="block text-[11px] font-black font-brand-outfit text-slate-800 uppercase tracking-wider">
+                                        Scratch & Win
+                                    </span>
+                                    <div className="mt-1 px-2.5 py-1 bg-purple-50 border border-purple-200 rounded-lg text-purple-700 font-bold text-[10px] flex items-center gap-1">
+                                        🎁 You Won!
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 2. BOTTOM-LEFT FLOATING CARD: TOTAL CLAIMS METRIC */}
+                        <div className="absolute -bottom-8 left-4 sm:left-10 z-30 animate-float-gentle">
+                            <div className="bg-white rounded-2xl p-4 shadow-sticker border border-slate-100 text-left w-44">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                                    Total Claims
+                                </span>
+                                <div className="flex items-baseline gap-2 mt-1">
+                                    <span className="text-2xl font-black font-brand-outfit text-slate-900">
+                                        18
+                                    </span>
+                                    <span className="text-xs font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md">
+                                        +28%
+                                    </span>
+                                </div>
+                                {/* Mini Bar Chart */}
+                                <div className="flex items-end gap-1.5 h-6 mt-2 pt-1 border-t border-slate-100">
+                                    <div className="flex-1 bg-amber-200 rounded-t h-2" />
+                                    <div className="flex-1 bg-amber-300 rounded-t h-3.5" />
+                                    <div className="flex-1 bg-amber-400 rounded-t h-4" />
+                                    <div className="flex-1 bg-amber-500 rounded-t h-5" />
+                                    <div className="flex-1 bg-amber-600 rounded-t h-6" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 3. RIGHT FLOATING CARD: SPIN & WIN WHEEL */}
+                        <div className="absolute -top-4 -right-4 sm:-right-6 z-30 animate-float-tilt-right">
+                            <div className="bg-white rounded-2xl p-3.5 shadow-sticker border border-blue-100 text-center w-36">
+                                <div className="flex items-center gap-1.5 mb-2 justify-center">
+                                    <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                                        <TrendingUp className="w-3 h-3" />
+                                    </div>
+                                    <span className="text-[11px] font-black font-brand-outfit text-slate-800">
+                                        Spin & Win
+                                    </span>
+                                </div>
+                                {/* Mini Multi-Color Wheel */}
+                                <div className="relative w-20 h-20 mx-auto my-1">
+                                    <div className="w-full h-full rounded-full bg-conic-spin shadow-sm border-2 border-white animate-spin-slow" />
+                                    <div className="absolute inset-0 m-auto w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center text-[10px]">
+                                        🎁
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* 4. BOTTOM-RIGHT FLOATING CARD: ₹100 OFF COUPON */}
+                        <div className="absolute -bottom-6 -right-2 sm:-right-6 z-30 animate-float-tilt-left">
+                            <div className="bg-white rounded-2xl p-3 shadow-sticker border border-amber-200 text-center w-36">
+                                <div className="px-2.5 py-1 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 font-black text-xs font-brand-outfit flex items-center justify-center gap-1">
+                                    🎟️ ₹100 OFF
+                                </div>
+                                <span className="block text-[10px] font-bold text-slate-400 mt-1">
+                                    Discount Coupon
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* MAIN DASHBOARD WINDOW MOCKUP */}
+                        <div className="relative bg-white rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-200/80 overflow-hidden text-left">
+                            {/* Browser Top Window Bar */}
+                            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200/80 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                                    <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                                </div>
+
+                                {/* Simulated Mini Navigation */}
+                                <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+                                    <div className="flex items-center gap-1">
+                                        <div className="w-5 h-5 rounded-md border border-slate-300 p-0.5">
+                                            <CoffeeCupIcon className="w-full h-full" />
+                                        </div>
+                                        <span className="font-brand-outfit font-black text-slate-900 text-xs">coffercard</span>
+                                    </div>
+                                    <span className="hidden sm:inline-block px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">Dashboard</span>
+                                    <span className="hidden sm:inline-block text-[10px]">Campaigns</span>
+                                    <span className="hidden sm:inline-block text-[10px]">Settings</span>
+                                </div>
+
+                                <div className="flex items-center gap-1.5 text-[10px] font-bold bg-white px-2 py-1 rounded-full border border-slate-200">
+                                    <div className="w-3.5 h-3.5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[8px]">D</div>
+                                    <span className="hidden sm:inline">Demo_vendor Store</span>
+                                </div>
+                            </div>
+
+                            {/* Simulated Dashboard Content */}
+                            <div className="p-5 sm:p-7 bg-[#FDFBF7] space-y-5">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-base sm:text-lg font-black font-brand-outfit text-slate-900">
+                                            Welcome back, Demo_vendor Store 👋
+                                        </h3>
+                                        <p className="text-[11px] text-slate-400">
+                                            Track customer engagement and grow your business with gamification.
+                                        </p>
+                                    </div>
+                                    <div className="px-3 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold shadow-xs flex items-center gap-1">
+                                        + Create Campaign
+                                    </div>
+                                </div>
+
+                                {/* 4 Stat Pills */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                                        <span className="text-[10px] font-bold text-slate-400 block">Total Campaigns</span>
+                                        <span className="text-lg font-black text-slate-900 font-brand-outfit">5</span>
+                                        <span className="text-[9px] text-amber-600 font-bold block">2 active currently</span>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                                        <span className="text-[10px] font-bold text-slate-400 block">Total Claims</span>
+                                        <span className="text-lg font-black text-slate-900 font-brand-outfit">18</span>
+                                        <span className="text-[9px] text-rose-500 font-bold block">Prizes awarded</span>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                                        <span className="text-[10px] font-bold text-slate-400 block">Pending In-Store</span>
+                                        <span className="text-lg font-black text-amber-600 font-brand-outfit">13</span>
+                                        <span className="text-[9px] text-amber-600 font-bold block">Awaiting verification</span>
+                                    </div>
+                                    <div className="bg-white p-3 rounded-xl border border-slate-100 shadow-xs">
+                                        <span className="text-[10px] font-bold text-slate-400 block">Redeemed</span>
+                                        <span className="text-lg font-black text-purple-600 font-brand-outfit">5</span>
+                                        <span className="text-[9px] text-purple-600 font-bold block">Completed vouchers</span>
+                                    </div>
+                                </div>
+
+                                {/* Campaign Hub Section */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-xs font-bold font-brand-outfit text-slate-800">Campaign Hub</span>
+                                        <span className="text-[10px] text-slate-400">Select a campaign to manage or view performance</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                        <div className="bg-white p-3 rounded-xl border border-amber-400 ring-1 ring-amber-400/20 shadow-xs">
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">ACTIVE</span>
+                                                <span className="text-slate-400">Scratch</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-900 font-brand-outfit block mt-1">Mystery Scratch & Save</span>
+                                            <div className="text-[10px] text-slate-400 mt-2 flex justify-between">
+                                                <span>Claims</span>
+                                                <span>4 / 500</span>
+                                            </div>
+                                            <div className="w-full h-1 bg-slate-100 rounded-full mt-1">
+                                                <div className="w-1/4 h-full bg-amber-500 rounded-full" />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-bold">ENDED</span>
+                                                <span className="text-slate-400">Spin</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-900 font-brand-outfit block mt-1">Summer Lucky Spin</span>
+                                            <div className="text-[10px] text-slate-400 mt-2 flex justify-between">
+                                                <span>Claims</span>
+                                                <span>13 / 1000</span>
+                                            </div>
+                                            <div className="w-full h-1 bg-slate-100 rounded-full mt-1">
+                                                <div className="w-1/2 h-full bg-indigo-500 rounded-full" />
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs hidden sm:block">
+                                            <div className="flex justify-between items-center text-[10px]">
+                                                <span className="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">ACTIVE</span>
+                                                <span className="text-slate-400">Box</span>
+                                            </div>
+                                            <span className="text-xs font-bold text-slate-900 font-brand-outfit block mt-1">Festival Mystery Box</span>
+                                            <div className="text-[10px] text-slate-400 mt-2 flex justify-between">
+                                                <span>Claims</span>
+                                                <span>25 / 500</span>
+                                            </div>
+                                            <div className="w-full h-1 bg-slate-100 rounded-full mt-1">
+                                                <div className="w-1/3 h-full bg-orange-500 rounded-full" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-7xl mx-auto text-center">
-                    <div className="flex items-center justify-center space-x-2 mb-4">
-                        <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-2 rounded-lg">
-                            <Gift className="w-5 h-5 text-white" />
+            {/* "HOW IT WORKS" HORIZONTAL 4-STEP PROCESS (AS SEEN IN MOCKUP) */}
+            <section id="how-it-works" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="bg-white rounded-3xl sm:rounded-[36px] p-6 sm:p-10 border border-slate-100 shadow-supercard">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        {/* Title Col */}
+                        <div className="lg:col-span-3 text-left">
+                            <h2 className="text-2xl sm:text-3xl font-black font-brand-outfit text-slate-900 tracking-tight">
+                                How it works
+                            </h2>
+                            <p className="text-slate-500 text-xs sm:text-sm mt-1 leading-relaxed">
+                                Launch your campaign in minutes and turn everyday customers into winners.
+                            </p>
                         </div>
-                        <span className="text-xl font-bold text-white">CofferCard</span>
+
+                        {/* 4 Connected Steps */}
+                        <div className="lg:col-span-9 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
+                            {/* Step 1 */}
+                            <div className="flex items-start gap-3 relative">
+                                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center flex-shrink-0">
+                                    <QrCode className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-sm font-brand-outfit text-slate-900">1. Scan</h4>
+                                    <p className="text-xs text-slate-500 mt-0.5 leading-snug">
+                                        Customers scan a QR code at your store or online.
+                                    </p>
+                                </div>
+                                <ChevronRight className="hidden lg:block w-4 h-4 text-slate-300 absolute -right-2 top-3" />
+                            </div>
+
+                            {/* Step 2 */}
+                            <div className="flex items-start gap-3 relative">
+                                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0">
+                                    <Gamepad2 className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-sm font-brand-outfit text-slate-900">2. Play</h4>
+                                    <p className="text-xs text-slate-500 mt-0.5 leading-snug">
+                                        They play a scratch card, spin the wheel or open a box.
+                                    </p>
+                                </div>
+                                <ChevronRight className="hidden lg:block w-4 h-4 text-slate-300 absolute -right-2 top-3" />
+                            </div>
+
+                            {/* Step 3 */}
+                            <div className="flex items-start gap-3 relative">
+                                <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center flex-shrink-0">
+                                    <Gift className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-sm font-brand-outfit text-slate-900">3. Win</h4>
+                                    <p className="text-xs text-slate-500 mt-0.5 leading-snug">
+                                        Instantly discover rewards and special offers.
+                                    </p>
+                                </div>
+                                <ChevronRight className="hidden lg:block w-4 h-4 text-slate-300 absolute -right-2 top-3" />
+                            </div>
+
+                            {/* Step 4 */}
+                            <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                                    <Ticket className="w-5 h-5" />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-black text-sm font-brand-outfit text-slate-900">4. Redeem</h4>
+                                    <p className="text-xs text-slate-500 mt-0.5 leading-snug">
+                                        Use rewards in-store or online checkout.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <p className="text-sm">
-                        Gamified marketing platform for modern businesses
+                </div>
+            </section>
+
+            {/* 4 GAME FORMATS ROW (AS SEEN IN MOCKUP) */}
+            <section id="games" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-left">
+                    {/* 1. Scratch & Win */}
+                    <div className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-supercard hover:shadow-supercard-hover transition-all flex flex-col justify-between group">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-sm">
+                                    <Zap className="w-5 h-5" />
+                                </div>
+                                <div className="w-12 h-8 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center text-xs">
+                                    🎟️
+                                </div>
+                            </div>
+                            <h3 className="font-black text-base font-brand-outfit text-slate-900">Scratch & Win</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Fun scratch-off games that reveal instant prizes and excitement.
+                            </p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-end">
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors"
+                            >
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 2. Spin & Win */}
+                    <div className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-supercard hover:shadow-supercard-hover transition-all flex flex-col justify-between group">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
+                                    <TrendingUp className="w-5 h-5" />
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-conic-spin border border-white shadow-xs" />
+                            </div>
+                            <h3 className="font-black text-base font-brand-outfit text-slate-900">Spin & Win</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Customizable spin-the-wheel campaigns with exciting store rewards.
+                            </p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-end">
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors"
+                            >
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 3. Mystery Box */}
+                    <div className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-supercard hover:shadow-supercard-hover transition-all flex flex-col justify-between group">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 font-bold flex items-center justify-center shadow-sm">
+                                    <Gift className="w-5 h-5" />
+                                </div>
+                                <div className="w-10 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-xs">
+                                    🎁
+                                </div>
+                            </div>
+                            <h3 className="font-black text-base font-brand-outfit text-slate-900">Mystery Box</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Let customers tap and open interactive 3D gift boxes of surprises.
+                            </p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-end">
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-amber-500 group-hover:text-slate-950 transition-colors"
+                            >
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* 4. Digital Coupons */}
+                    <div className="bg-white rounded-[28px] p-6 border border-slate-100 shadow-supercard hover:shadow-supercard-hover transition-all flex flex-col justify-between group">
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-sm">
+                                    <Ticket className="w-5 h-5" />
+                                </div>
+                                <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-xs font-bold text-rose-600">
+                                    %
+                                </div>
+                            </div>
+                            <h3 className="font-black text-base font-brand-outfit text-slate-900">Digital Coupons</h3>
+                            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                                Drive repeat visits with discount codes and special checkout vouchers.
+                            </p>
+                        </div>
+                        <div className="mt-6 flex items-center justify-end">
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors"
+                            >
+                                <ArrowRight className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* SOCIAL PROOF / METRICS BAR (AS SEEN IN MOCKUP) */}
+            <section className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                                <Users className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                                <span className="text-lg sm:text-xl font-black font-brand-outfit text-slate-900 block leading-tight">
+                                    500+
+                                </span>
+                                <span className="text-xs text-slate-500">Businesses trust coffercard</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                                <Gift className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                                <span className="text-lg sm:text-xl font-black font-brand-outfit text-slate-900 block leading-tight">
+                                    1M+
+                                </span>
+                                <span className="text-xs text-slate-500">Rewards claimed</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center">
+                                <TrendingUp className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                                <span className="text-lg sm:text-xl font-black font-brand-outfit text-slate-900 block leading-tight">
+                                    3x
+                                </span>
+                                <span className="text-xs text-slate-500">Higher customer engagement</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                                <Heart className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                                <span className="text-lg sm:text-xl font-black font-brand-outfit text-slate-900 block leading-tight">
+                                    90%
+                                </span>
+                                <span className="text-xs text-slate-500">Would recommend</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* 6 CORE FEATURES GRID (REQUESTED BY USER) */}
+            <section id="features" className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div className="text-center max-w-3xl mx-auto mb-14">
+                    <span className="text-xs font-bold text-amber-800 uppercase tracking-wider bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200">
+                        Powerful Marketing Toolkit
+                    </span>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-brand-outfit text-slate-900 tracking-tight mt-3">
+                        Everything You Need to Succeed
+                    </h2>
+                    <p className="text-slate-500 text-sm sm:text-base mt-2">
+                        Comprehensive features engineered specifically for retail stores, salons, cafés, and local brands.
                     </p>
-                    <p className="text-xs mt-4">
-                        © 2024 CofferCard. All rights reserved.
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 text-left">
+                    {featureItems.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                            <div
+                                key={item.id}
+                                className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-supercard hover:shadow-supercard-hover transition-all duration-300 flex flex-col justify-between group"
+                            >
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className={`w-14 h-14 rounded-2xl ${item.bg} ${item.border} border flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs`}>
+                                            <Icon className={`w-7 h-7 ${item.text}`} />
+                                        </div>
+                                        <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-600 font-brand-outfit">
+                                            {item.badge}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="text-xl font-bold font-brand-outfit text-slate-900 mb-2.5">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-slate-500 text-sm leading-relaxed">
+                                        {item.description}
+                                    </p>
+                                </div>
+
+                                <div className="pt-6 mt-6 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-700 group-hover:text-amber-800">
+                                    <span>Learn more</span>
+                                    <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </section>
+
+            {/* LIVE EXPERIENCE BANNER WITH SCANNABLE QR */}
+            <section className="relative z-20 py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="relative bg-gradient-to-r from-slate-900 via-slate-800 to-slate-950 rounded-[36px] p-8 sm:p-14 overflow-hidden text-white shadow-2xl">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                        <div className="lg:col-span-7 text-left">
+                            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1.5 rounded-full mb-6 text-amber-300 text-xs font-bold uppercase tracking-wider">
+                                <Sparkles className="w-3.5 h-3.5" /> Live Experience
+                            </div>
+                            <h2 className="text-3xl sm:text-5xl font-extrabold font-brand-outfit tracking-tight leading-tight">
+                                Try a live game right on your phone!
+                            </h2>
+                            <p className="mt-4 text-slate-300 text-base sm:text-lg max-w-lg leading-relaxed">
+                                Scan the QR code with your phone's camera to experience how effortlessly your customers play and win prizes.
+                            </p>
+
+                            <div className="mt-8 flex flex-wrap gap-4">
+                                <button
+                                    onClick={() => navigate('/signup')}
+                                    className="px-8 py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm font-brand-outfit transition-all shadow-lg hover:shadow-amber-500/20 hover:scale-105"
+                                >
+                                    Create Free Store Account
+                                </button>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm transition-all"
+                                >
+                                    Vendor Sign In
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Phone Mockup with Live Demo QR */}
+                        <div className="lg:col-span-5 flex justify-center">
+                            <div className="w-64 sm:w-72 bg-white rounded-[40px] p-4 shadow-2xl border-4 border-slate-700 text-slate-900 text-center">
+                                <div className="w-16 h-4 bg-slate-900 rounded-full mx-auto mb-4" />
+                                <div className="bg-amber-50/60 rounded-2xl p-4 flex flex-col items-center">
+                                    <div className="bg-white p-3 rounded-2xl shadow-sm border border-amber-100 mb-3">
+                                        <QRCodeSVG
+                                            value="https://coffercard.com/"
+                                            size={160}
+                                            level="M"
+                                            includeMargin={false}
+                                        />
+                                    </div>
+                                    <span className="text-xs font-black text-amber-900 font-brand-outfit tracking-wider uppercase">
+                                        Scan to Play
+                                    </span>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">
+                                        Point camera to test
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* MINIMALIST FOOTER */}
+            <footer className="relative z-20 py-12 border-t border-slate-200 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div onClick={() => navigate('/')}>
+                        <Logo theme="light" size="sm" />
+                    </div>
+
+                    <div className="flex items-center gap-6 text-sm text-slate-500 font-medium">
+                        <a href="#how-it-works" className="hover:text-slate-900 transition-colors">How It Works</a>
+                        <a href="#games" className="hover:text-slate-900 transition-colors">Games</a>
+                        <a href="#features" className="hover:text-slate-900 transition-colors">Features</a>
+                        <button onClick={() => navigate('/login')} className="hover:text-slate-900 transition-colors">Sign in</button>
+                        <button onClick={() => navigate('/signup')} className="hover:text-slate-900 transition-colors">Partner</button>
+                    </div>
+
+                    <p className="text-xs text-slate-400">
+                        © 2026 CofferCard. All rights reserved.
                     </p>
-                    <p className="text-xs mt-4">
-  © Owned and managed by{" "}
-  <a
-    href="https://infobuddha.com/"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="text-blue-500 hover:underline"
-  >
-    Infobuddha Technologies
-  </a>
-</p>
                 </div>
             </footer>
         </div>

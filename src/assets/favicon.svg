@@ -1,0 +1,33 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="brandGold" x1="8" y1="16" x2="84" y2="92" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="50%" stop-color="#FBBF24" />
+      <stop offset="100%" stop-color="#F59E0B" />
+    </linearGradient>
+  </defs>
+
+  <!-- 2 Playful Rays at Top-Right -->
+  <line x1="81" y1="18" x2="86" y2="9" stroke="#10B981" stroke-width="5" stroke-linecap="round" />
+  <line x1="86" y1="26" x2="95" y2="22" stroke="#10B981" stroke-width="5" stroke-linecap="round" />
+
+  <!-- Squircle Base with Soft Golden Honey Gradient -->
+  <rect x="8" y="16" width="76" height="76" rx="24" fill="url(#brandGold)" />
+
+  <!-- 3 Vertical Steam Capsules -->
+  <rect x="33.5" y="29" width="4.5" height="11" rx="2.25" fill="#0F172A" />
+  <rect x="42.5" y="29" width="4.5" height="11" rx="2.25" fill="#0F172A" />
+  <rect x="51.5" y="29" width="4.5" height="11" rx="2.25" fill="#0F172A" />
+
+  <!-- Coffee Cup Bowl -->
+  <path d="M26 44H64C64 44 62 65 54 67H36C28 65 26 44 26 44Z" fill="#0F172A" />
+
+  <!-- Cup Handle -->
+  <path d="M64 48C70.5 48 73.5 52 72.5 58C71.5 63 67 64 63 63" stroke="#0F172A" stroke-width="4.5" stroke-linecap="round" />
+
+  <!-- Star Knockout inside Cup -->
+  <path d="M45 50.5L46.8 54.2L50.9 54.8L47.9 57.7L48.6 61.8L45 59.9L41.4 61.8L42.1 57.7L39.1 54.8L43.2 54.2Z" fill="#FCD34D" />
+
+  <!-- Saucer Base -->
+  <rect x="24" y="71" width="42" height="4.5" rx="2.25" fill="#0F172A" />
+</svg>

@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_URL, fetchWithAuth } from '../services/api';
-import { Settings as SettingsIcon, Save, Building, Phone, MapPin, FileText } from 'lucide-react';
+import { 
+    Settings as SettingsIcon, 
+    Save, 
+    Building, 
+    Phone, 
+    MapPin, 
+    FileText, 
+    CheckCircle2, 
+    AlertCircle, 
+    ExternalLink,
+    Store
+} from 'lucide-react';
 
 const SettingsPage = () => {
     const [settings, setSettings] = useState({
@@ -21,20 +32,14 @@ const SettingsPage = () => {
     const fetchSettings = async () => {
         try {
             setLoading(true);
-            console.log('Fetching settings from:', `${BASE_URL}/vendors/settings/`);
             const response = await fetchWithAuth(`${BASE_URL}/vendors/settings/`);
-
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error('Error response:', errorData);
                 throw new Error(`Failed to fetch settings: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('Settings data received:', data);
             setSettings({
                 company_name: data.company_name || '',
                 company_phone: data.company_phone || '',
@@ -56,29 +61,22 @@ const SettingsPage = () => {
         setMessage({ type: '', text: '' });
 
         try {
-            console.log('Saving settings:', settings);
             const response = await fetchWithAuth(`${BASE_URL}/vendors/settings/`, {
                 method: 'PUT',
                 body: JSON.stringify(settings)
             });
 
-            console.log('Save response status:', response.status);
-
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                console.error('Save error response:', errorData);
                 throw new Error(`Failed to save settings: ${response.status}`);
             }
 
             const data = await response.json();
-            console.log('Settings saved, response:', data);
             setSettings(data);
-            setMessage({ type: 'success', text: 'Settings saved successfully!' });
+            setMessage({ type: 'success', text: 'Store settings saved successfully!' });
 
-            // Clear success message after 3 seconds
             setTimeout(() => {
                 setMessage({ type: '', text: '' });
-            }, 3000);
+            }, 3500);
         } catch (error) {
             console.error('Error saving settings:', error);
             setMessage({ type: 'error', text: `Failed to save settings: ${error.message}` });
@@ -97,166 +95,192 @@ const SettingsPage = () => {
 
     if (loading) {
         return (
-            <div className="p-6 flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading settings...</p>
-                </div>
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center font-brand-sans">
+                <div className="w-12 h-12 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-slate-500 font-medium text-sm">
+                    Loading store profile...
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="p-4 sm:p-6 max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-md">
-                {/* Header */}
-                <div className="border-b border-gray-200 px-4 sm:px-6 py-4">
-                    <div className="flex items-start sm:items-center">
-                        <SettingsIcon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600 mr-2 sm:mr-3 flex-shrink-0 mt-1 sm:mt-0" />
+        <div className="max-w-4xl mx-auto space-y-8 font-brand-sans pb-12">
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl sm:text-3xl font-black font-brand-outfit text-slate-900 tracking-tight">
+                    Store Settings & Profile
+                </h1>
+                <p className="text-slate-500 text-xs sm:text-sm mt-1">
+                    Configure your business profile, location details, and customer redemption instructions.
+                </p>
+            </div>
+
+            {/* Notification Banner */}
+            {message.text && (
+                <div className={`p-4 rounded-2xl flex items-center gap-2.5 text-xs sm:text-sm font-semibold transition-all ${
+                    message.type === 'success'
+                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                        : 'bg-rose-50 border border-rose-200 text-rose-800'
+                }`}>
+                    {message.type === 'success' ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    ) : (
+                        <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />
+                    )}
+                    <span>{message.text}</span>
+                </div>
+            )}
+
+            <form onSubmit={handleSave} className="space-y-6">
+                {/* 1. Store Identity Section */}
+                <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-supercard border border-slate-100 space-y-6">
+                    <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                            <Store className="w-5 h-5" />
+                        </div>
                         <div>
-                            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Company Settings</h1>
-                            <p className="text-xs sm:text-sm text-gray-600 mt-1">
-                                Manage your company information and prize redemption details
+                            <h2 className="text-lg font-black font-brand-outfit text-slate-900">
+                                Business Identity
+                            </h2>
+                            <p className="text-xs text-slate-400">
+                                Shown on customer campaign games and digital prize vouchers.
                             </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Store / Company Name
+                            </label>
+                            <div className="relative">
+                                <Building className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    name="company_name"
+                                    value={settings.company_name}
+                                    onChange={handleChange}
+                                    placeholder="Your Business Name"
+                                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Contact Phone Number
+                            </label>
+                            <div className="relative">
+                                <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <input
+                                    type="tel"
+                                    name="company_phone"
+                                    value={settings.company_phone}
+                                    onChange={handleChange}
+                                    placeholder="+91 98765 43210"
+                                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Message Display */}
-                {message.text && (
-                    <div className={`mx-4 sm:mx-6 mt-4 sm:mt-6 px-4 py-3 rounded text-sm ${
-                        message.type === 'success'
-                            ? 'bg-green-100 border border-green-400 text-green-700'
-                            : 'bg-red-100 border border-red-400 text-red-700'
-                    }`}>
-                        {message.text}
-                    </div>
-                )}
-
-                {/* Form */}
-                <form onSubmit={handleSave} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
-                    {/* Company Name (Read-only) */}
-                    <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <Building className="w-4 h-4 mr-2" />
-                            Company Name
-                        </label>
-                        <input
-                            type="text"
-                            name="company_name"
-                            value={settings.company_name}
-                            readOnly
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Company name cannot be changed here</p>
+                {/* 2. Physical Location */}
+                <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-supercard border border-slate-100 space-y-6">
+                    <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div className="w-10 h-10 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                            <MapPin className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black font-brand-outfit text-slate-900">
+                                Location & Directions
+                            </h2>
+                            <p className="text-xs text-slate-400">
+                                Helps customers locate your outlet to redeem their in-store rewards.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Company Phone */}
-                    <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <Phone className="w-4 h-4 mr-2" />
-                            Company Phone
-                        </label>
-                        <input
-                            type="tel"
-                            name="company_phone"
-                            value={settings.company_phone}
-                            onChange={handleChange}
-                            placeholder="e.g., +1 (555) 123-4567"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Contact number for customer inquiries</p>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Physical Store Address
+                            </label>
+                            <textarea
+                                name="company_address"
+                                value={settings.company_address}
+                                onChange={handleChange}
+                                rows="2"
+                                placeholder="123 Market Street, Downtown, City"
+                                className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                Google Maps Link (Optional)
+                            </label>
+                            <input
+                                type="url"
+                                name="company_location"
+                                value={settings.company_location}
+                                onChange={handleChange}
+                                placeholder="https://maps.google.com/..."
+                                className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Cashier Redemption Guidelines */}
+                <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-supercard border border-slate-100 space-y-6">
+                    <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
+                        <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <FileText className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black font-brand-outfit text-slate-900">
+                                Cashier Redemption Guidelines
+                            </h2>
+                            <p className="text-xs text-slate-400">
+                                Instructions displayed to winning customers on their digital voucher screen.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Company Address */}
                     <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <Building className="w-4 h-4 mr-2" />
-                            Company Address
-                        </label>
-                        <textarea
-                            name="company_address"
-                            value={settings.company_address}
-                            onChange={handleChange}
-                            rows="3"
-                            placeholder="Enter your complete company address"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Full address where customers can visit</p>
-                    </div>
-
-                    {/* Company Location */}
-                    <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <MapPin className="w-4 h-4 mr-2" />
-                            Location Details / Google Maps Link
-                        </label>
-                        <input
-                            type="text"
-                            name="company_location"
-                            value={settings.company_location}
-                            onChange={handleChange}
-                            placeholder="e.g., Near City Mall or Google Maps URL"
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Landmarks or Google Maps link for easy navigation</p>
-                    </div>
-
-                    {/* Redemption Instructions */}
-                    <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <FileText className="w-4 h-4 mr-2" />
-                            Prize Redemption Instructions
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                            Customer Instructions
                         </label>
                         <textarea
                             name="redemption_instructions"
                             value={settings.redemption_instructions}
                             onChange={handleChange}
-                            rows="6"
-                            placeholder="Enter detailed instructions on how winners can redeem their prizes..."
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                            rows="3"
+                            placeholder="e.g. Show this screen to the counter cashier before bill payment to apply your discount."
+                            className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 bg-slate-50/50 focus:bg-white"
                         />
-                        <p className="mt-1 text-xs text-gray-500">
-                            These instructions will be included in winner notification emails. Be specific about:
-                            <br />• How to redeem (in-store, online, etc.)
-                            <br />• What to bring (ID, email confirmation, etc.)
-                            <br />• Redemption validity period
-                            <br />• Business hours
-                        </p>
                     </div>
+                </div>
 
-                    {/* Info Box */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h3 className="text-sm font-semibold text-blue-900 mb-2">ℹ️ How This Works</h3>
-                        <ul className="text-sm text-blue-800 space-y-1">
-                            <li>• Winners will receive an email with their prize details</li>
-                            <li>• Your contact information and redemption instructions will be included</li>
-                            <li>• Make sure all details are accurate and up-to-date</li>
-                            <li>• Clear instructions help winners redeem their prizes easily</li>
-                        </ul>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-gray-200">
-                        <button
-                            type="button"
-                            onClick={fetchSettings}
-                            className="px-4 sm:px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base"
-                            disabled={saving}
-                        >
-                            Reset
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={saving}
-                            className="flex items-center justify-center px-4 sm:px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
-                        >
-                            <Save className="w-4 h-4 mr-2" />
-                            {saving ? 'Saving...' : 'Save Settings'}
-                        </button>
-                    </div>
-                </form>
-            </div>
+                {/* Save Button */}
+                <div className="flex justify-end pt-2">
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="px-8 py-3.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 hover:scale-105 disabled:opacity-50 flex items-center gap-2"
+                    >
+                        {saving ? (
+                            <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <>
+                                <Save className="w-4 h-4" /> Save Store Settings
+                            </>
+                        )}
+                    </button>
+                </div>
+            </form>
         </div>
     );
 };

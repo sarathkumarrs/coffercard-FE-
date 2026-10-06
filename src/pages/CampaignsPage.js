@@ -5,7 +5,23 @@ import CampaignQR from '../components/CampaignQR';
 import CampaignIntegrationModal from '../components/CampaignIntegrationModal';
 import CampaignDesignModal from '../components/CampaignDesignModal';
 import { BASE_URL, fetchWithAuth } from '../services/api';
-import { Trash2, Palette, Sparkles } from 'lucide-react';
+import { 
+    Trash2, 
+    Palette, 
+    Sparkles, 
+    Plus, 
+    Edit3, 
+    Gift, 
+    QrCode, 
+    Calendar, 
+    Shield, 
+    Instagram, 
+    Facebook, 
+    CheckCircle2, 
+    AlertCircle, 
+    X,
+    Store
+} from 'lucide-react';
 
 // Countdown Timer Component
 const CountdownTimer = ({ scheduledTime, onExpire }) => {
@@ -41,14 +57,13 @@ const CountdownTimer = ({ scheduledTime, onExpire }) => {
     }, [scheduledTime, onExpire]);
 
     return (
-        <span className="font-mono text-red-600 font-semibold">
+        <span className="font-mono text-rose-600 font-bold">
             {timeLeft}
         </span>
     );
 };
 
 const CampaignsPage = () => {
-    console.log('CampaignsPage Component Rendered');
     const { user } = useAuth();
     const [campaigns, setCampaigns] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -62,21 +77,20 @@ const CampaignsPage = () => {
         end_date: '',
         max_claims: 0,
         max_spins_per_ip: 50,
-        show_social_page:true,
-        instagram_link:'',
-        facebook_link:'',
-        guidelines:'',
-        is_in_store:false
+        show_social_page: true,
+        instagram_link: '',
+        facebook_link: '',
+        guidelines: '',
+        is_in_store: false
     });
 
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [editingCampaign, setEditingCampaign] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Helper function to convert UTC datetime to local datetime string for datetime-local input
     const convertUTCToLocal = (utcDateString) => {
+        if (!utcDateString) return '';
         const date = new Date(utcDateString);
-        // Get local date and format as YYYY-MM-DDTHH:mm for datetime-local input
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -85,119 +99,88 @@ const CampaignsPage = () => {
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
 
-
-
-    // Fetch campaigns
     const fetchCampaigns = useCallback(async () => {
         try {
             const response = await fetchWithAuth(`${BASE_URL}/campaigns/`);
             const data = await response.json();
-            // Sort campaigns by ID in descending order (newest first)
-            // Create a new array to ensure React detects the change
             const sortedData = [...data].sort((a, b) => b.id - a.id);
             setCampaigns(sortedData);
-            console.log('Campaigns:', sortedData);
         } catch (error) {
             console.error('Error fetching campaigns:', error);
         }
-    }, []); // Empty dependency array means this function reference stays stable
+    }, []);
 
     const handleEditCampaign = async (e) => {
         e.preventDefault();
-        if (isSubmitting) return; // Prevent double submission
+        if (isSubmitting) return;
 
         setIsSubmitting(true);
         try {
-            // Clean up the data before sending
             const campaignData = {
                 ...editingCampaign,
                 instagram_link: editingCampaign.instagram_link || '',
                 facebook_link: editingCampaign.facebook_link || '',
                 guidelines: editingCampaign.guidelines || '',
-                // Convert local datetime to ISO string with timezone
                 start_date: new Date(editingCampaign.start_date).toISOString(),
                 end_date: new Date(editingCampaign.end_date).toISOString()
             };
-
-            console.log('Updating campaign with data:', campaignData);
 
             const response = await fetchWithAuth(`${BASE_URL}/campaigns/${editingCampaign.id}/`, {
                 method: 'PUT',
                 body: JSON.stringify(campaignData)
             });
 
-            console.log('Response status:', response.status);
-
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
-                console.error('Update failed with error:', errorData);
-
-                // Format error messages from validation errors
                 let errorMessage = 'Failed to update campaign';
                 if (errorData) {
-                    if (errorData.detail) {
-                        errorMessage = errorData.detail;
-                    } else if (errorData.message) {
-                        errorMessage = errorData.message;
-                    } else if (typeof errorData === 'object') {
-                        // Handle field-specific validation errors
+                    if (errorData.detail) errorMessage = errorData.detail;
+                    else if (errorData.message) errorMessage = errorData.message;
+                    else {
                         const errors = Object.entries(errorData)
-                            .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
+                            .map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(', ') : value}`)
                             .join('\n');
-                        errorMessage = errors || 'Failed to update campaign';
+                        if (errors) errorMessage = errors;
                     }
                 }
-
                 throw new Error(errorMessage);
             }
 
+            await fetchCampaigns();
             setEditModalOpen(false);
             setEditingCampaign(null);
-            fetchCampaigns(); // Refresh the list
         } catch (error) {
             console.error('Error updating campaign:', error);
-            alert(`Failed to update campaign: ${error.message}`);
+            alert(error.message || 'Failed to update campaign');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const handleManagePrizes = (campaign) => {
-        setSelectedCampaign(campaign);
-    };
-
-    // Create campaign
     const handleCreateCampaign = async (e) => {
         e.preventDefault();
-        if (isSubmitting) return; // Prevent double submission
+        if (isSubmitting) return;
 
         setIsSubmitting(true);
         try {
-            const { vendor, ...campaignData } = newCampaign;
-
-            // Convert local datetime to ISO string with timezone
-            const dataToSend = {
-                ...campaignData,
-                start_date: new Date(campaignData.start_date).toISOString(),
-                end_date: new Date(campaignData.end_date).toISOString()
+            const campaignData = {
+                ...newCampaign,
+                start_date: new Date(newCampaign.start_date).toISOString(),
+                end_date: new Date(newCampaign.end_date).toISOString()
             };
-
-            console.log('Sending campaign data:', dataToSend);
 
             const response = await fetchWithAuth(`${BASE_URL}/campaigns/`, {
                 method: 'POST',
-                body: JSON.stringify(dataToSend)
+                body: JSON.stringify(campaignData)
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || 'Failed to create campaign');
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.detail || 'Failed to create campaign');
             }
 
-            const data = await response.json();
-            console.log('Campaign created:', data);
+            await fetchCampaigns();
             setIsCreateModalOpen(false);
-            fetchCampaigns();
             setNewCampaign({
                 name: '',
                 campaign_type: 'spin',
@@ -211,41 +194,32 @@ const CampaignsPage = () => {
                 guidelines: '',
                 is_in_store: false
             });
-        } catch (err) {
-            console.error('Error creating campaign:', err);
-            alert(err.message);
+        } catch (error) {
+            console.error('Error creating campaign:', error);
+            alert(error.message || 'Failed to create campaign');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-
-    const handleDeleteCampaign = async (campaignId) => {
-        // Show confirmation dialog
-        if (!window.confirm('Are you sure you want to delete this campaign? You will have 5 minutes to cancel.')) {
+    const handleDeleteCampaign = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this campaign? It will be permanently removed after the countdown.')) {
             return;
         }
 
         try {
-            const response = await fetchWithAuth(`${BASE_URL}/campaigns/${campaignId}/`, {
+            const response = await fetchWithAuth(`${BASE_URL}/campaigns/${id}/`, {
                 method: 'DELETE'
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('Delete failed:', response.status, errorText);
-                throw new Error(`Failed to schedule campaign for deletion (${response.status}): ${errorText}`);
+                throw new Error('Failed to schedule campaign deletion');
             }
 
-            const data = await response.json();
-            console.log('Campaign scheduled for deletion:', data);
-
-            // Refresh campaigns list to show the scheduled deletion
             fetchCampaigns();
-
         } catch (error) {
             console.error('Error deleting campaign:', error);
-            alert('Failed to schedule campaign for deletion');
+            alert('Failed to delete campaign');
         }
     };
 
@@ -259,7 +233,6 @@ const CampaignsPage = () => {
                 throw new Error('Failed to cancel deletion');
             }
 
-            // Refresh campaigns list
             fetchCampaigns();
         } catch (error) {
             console.error('Error cancelling deletion:', error);
@@ -267,137 +240,649 @@ const CampaignsPage = () => {
         }
     };
 
+    const handleManagePrizes = (campaign) => {
+        setSelectedCampaign(campaign);
+    };
+
     useEffect(() => {
         fetchCampaigns();
-    }, []);
+    }, [fetchCampaigns]);
+
+    const getGameBadge = (type) => {
+        switch (type) {
+            case 'slot': return { label: 'Slot Machine', icon: '🎰', bg: 'bg-amber-50 text-amber-800 border-amber-200' };
+            case 'box': return { label: 'Mystery Box', icon: '🎁', bg: 'bg-purple-50 text-purple-800 border-purple-200' };
+            case 'scratch': return { label: 'Scratch Card', icon: '🎟️', bg: 'bg-amber-50 text-amber-900 border-amber-200' };
+            case 'spin':
+            default: return { label: 'Spin & Win', icon: '🎡', bg: 'bg-indigo-50 text-indigo-800 border-indigo-200' };
+        }
+    };
 
     if (!campaigns) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+                <div className="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-slate-500 font-brand-sans font-medium text-sm">
+                    Loading campaigns...
+                </p>
+            </div>
+        );
     }
 
     return (
-        <div className="p-4 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                <h1 className="text-xl sm:text-2xl font-semibold">Campaigns</h1>
-                <button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm sm:text-base"
-                >
-                    Create Campaign
-                </button>
+        <div className="space-y-8 font-brand-sans pb-12">
+            {/* Header Action Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl sm:text-3xl font-black font-brand-outfit text-slate-900 tracking-tight">
+                        Reward Campaigns
+                    </h1>
+                    <p className="text-slate-500 text-xs sm:text-sm mt-1">
+                        Create, customize, and manage customer games and in-store QR standees.
+                    </p>
+                </div>
+
+                <div>
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs sm:text-sm font-brand-outfit transition-all shadow-md hover:shadow-amber-500/20 flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" /> Create New Campaign
+                    </button>
+                </div>
             </div>
 
-            <div className="grid gap-4">
-    {campaigns.map((campaign) => {
-        const getGameBadge = (type) => {
-            switch (type) {
-                case 'slot': return { label: 'Slot Machine', icon: '🎰', bg: 'bg-amber-50 text-amber-800 border-amber-300' };
-                case 'box': return { label: 'Mystery Box', icon: '🎁', bg: 'bg-purple-50 text-purple-800 border-purple-300' };
-                case 'scratch': return { label: 'Scratch Card', icon: '🎟️', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300' };
-                case 'spin':
-                default: return { label: 'Spin & Win', icon: '🎡', bg: 'bg-indigo-50 text-indigo-800 border-indigo-300' };
-            }
-        };
-        const badge = getGameBadge(campaign.campaign_type);
-
-        return (
-        <div
-            key={campaign.id}
-            className={`bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all ${
-                campaign.scheduled_for_deletion ? 'border-2 border-red-500 bg-red-50' : ''
-            }`}
-        >
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2.5 flex-wrap mb-1">
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900">{campaign.name}</h3>
-                        <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-0.5 rounded-full border ${badge.bg}`}>
-                            <span>{badge.icon}</span> {badge.label}
-                        </span>
-                        {campaign.is_in_store && (
-                            <span className="text-[11px] font-bold bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full border border-gray-200">
-                                🏬 In-Store Mode
-                            </span>
-                        )}
+            {/* Campaign Cards Grid */}
+            {campaigns.length === 0 ? (
+                <div className="bg-white rounded-[32px] p-12 text-center border-2 border-dashed border-slate-200 shadow-sm max-w-lg mx-auto">
+                    <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4">
+                        <Gift className="w-8 h-8" />
                     </div>
-                    {campaign.scheduled_for_deletion && (
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm text-red-600 font-semibold">
-                                Deleting in:
-                            </span>
-                            <CountdownTimer
-                                scheduledTime={campaign.scheduled_for_deletion}
-                                onExpire={fetchCampaigns}
-                            />
-                        </div>
-                    )}
+                    <h3 className="text-xl font-black font-brand-outfit text-slate-900 mb-2">
+                        No campaigns found
+                    </h3>
+                    <p className="text-slate-500 text-xs sm:text-sm mb-6">
+                        You haven't created any reward campaigns yet. Set up a Spin & Win or Scratch Card campaign to start rewarding customers!
+                    </p>
+                    <button
+                        onClick={() => setIsCreateModalOpen(true)}
+                        className="px-6 py-3 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-colors shadow-md"
+                    >
+                        Create Your First Campaign
+                    </button>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    {campaign.scheduled_for_deletion ? (
-                        <button
-                            onClick={() => handleCancelDeletion(campaign.id)}
-                            className="bg-orange-500 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-orange-600"
-                        >
-                            Cancel Deletion
-                        </button>
-                    ) : (
-                        <>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {campaigns.map((campaign) => {
+                        const badge = getGameBadge(campaign.campaign_type);
+                        const isExpired = new Date(campaign.end_date) < new Date();
+
+                        return (
+                            <div
+                                key={campaign.id}
+                                className={`bg-white rounded-[32px] p-6 shadow-supercard border transition-all flex flex-col justify-between ${
+                                    campaign.scheduled_for_deletion
+                                        ? 'border-rose-400 bg-rose-50/40'
+                                        : 'border-slate-100 hover:shadow-supercard-hover'
+                                }`}
+                            >
+                                <div>
+                                    {/* Top Status & Game Type row */}
+                                    <div className="flex items-center justify-between gap-2 mb-3">
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${badge.bg}`}>
+                                            <span>{badge.icon}</span> {badge.label}
+                                        </span>
+
+                                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                            isExpired ? 'bg-slate-100 text-slate-500' : 'bg-amber-100 text-amber-900'
+                                        }`}>
+                                            {isExpired ? 'Ended' : 'Active'}
+                                        </span>
+                                    </div>
+
+                                    {/* Campaign Name */}
+                                    <h3 className="text-xl font-black font-brand-outfit text-slate-900 tracking-tight mb-2">
+                                        {campaign.name}
+                                    </h3>
+
+                                    {campaign.scheduled_for_deletion && (
+                                        <div className="mb-3 p-3 bg-rose-100/70 border border-rose-300 rounded-2xl flex items-center justify-between text-xs text-rose-800">
+                                            <span>Deleting in:</span>
+                                            <CountdownTimer
+                                                scheduledTime={campaign.scheduled_for_deletion}
+                                                onExpire={fetchCampaigns}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {/* Metadata Details */}
+                                    <div className="space-y-1.5 text-xs text-slate-500 py-3 border-y border-slate-100 my-4">
+                                        <div className="flex justify-between">
+                                            <span>Duration:</span>
+                                            <span className="font-semibold text-slate-700">
+                                                {new Date(campaign.start_date).toLocaleDateString()} – {new Date(campaign.end_date).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Max Claims:</span>
+                                            <span className="font-semibold text-slate-700">
+                                                {campaign.max_claims || 'Unlimited'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Plays / IP Limit:</span>
+                                            <span className="font-semibold text-slate-700">
+                                                {campaign.max_spins_per_ip ?? 50}
+                                            </span>
+                                        </div>
+                                        {campaign.is_in_store && (
+                                            <div className="flex justify-between text-amber-800 font-bold">
+                                                <span>Mode:</span>
+                                                <span>🏬 In-Store Counter</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Action Buttons Toolbar */}
+                                <div className="space-y-2 pt-2">
+                                    {campaign.scheduled_for_deletion ? (
+                                        <button
+                                            onClick={() => handleCancelDeletion(campaign.id)}
+                                            className="w-full py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs font-brand-outfit transition-colors shadow-sm"
+                                        >
+                                            Cancel Deletion
+                                        </button>
+                                    ) : (
+                                        <>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={() => handleManagePrizes(campaign)}
+                                                    className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-amber-50 text-slate-800 hover:text-amber-800 font-bold text-xs font-brand-outfit transition-all flex items-center justify-center gap-1.5"
+                                                >
+                                                    <Gift className="w-3.5 h-3.5" /> Manage Prizes
+                                                </button>
+                                                <button
+                                                    onClick={() => setSelectedCampaignForDesign(campaign)}
+                                                    className="py-2.5 px-3 rounded-2xl bg-slate-100 hover:bg-purple-50 text-slate-800 hover:text-purple-700 font-bold text-xs font-brand-outfit transition-all flex items-center justify-center gap-1.5"
+                                                >
+                                                    <Palette className="w-3.5 h-3.5" /> Studio Themes
+                                                </button>
+                                            </div>
+
+                                            <div className="grid grid-cols-3 gap-2">
+                                                <button
+                                                    onClick={() => setSelectedCampaignForQR(campaign)}
+                                                    className="col-span-2 py-2.5 px-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                                                >
+                                                    <QrCode className="w-3.5 h-3.5" /> Standee & QR
+                                                </button>
+                                                <div className="flex gap-1.5 justify-end">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingCampaign({
+                                                                ...campaign,
+                                                                start_date: convertUTCToLocal(campaign.start_date),
+                                                                end_date: convertUTCToLocal(campaign.end_date)
+                                                            });
+                                                            setEditModalOpen(true);
+                                                        }}
+                                                        className="flex-1 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors"
+                                                        title="Edit details"
+                                                    >
+                                                        <Edit3 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteCampaign(campaign.id)}
+                                                        className="flex-1 py-2 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-colors"
+                                                        title="Delete campaign"
+                                                    >
+                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* CREATE CAMPAIGN MODAL */}
+            {isCreateModalOpen && (
+                <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-brand-sans">
+                    <div className="bg-white rounded-[36px] max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <div>
+                                <h2 className="text-xl font-black font-brand-outfit text-slate-900">
+                                    Create New Campaign
+                                </h2>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Set up your in-store game and start rewarding shoppers.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setIsCreateModalOpen(false)}
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+                            <form id="createCampaignForm" onSubmit={handleCreateCampaign} className="space-y-5">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                        Campaign Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={newCampaign.name}
+                                        onChange={e => setNewCampaign({ ...newCampaign, name: e.target.value })}
+                                        placeholder="e.g. Summer Lucky Spin & Win"
+                                        className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+
+                                {/* VISUAL GAME SELECTOR CARDS */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                                        Select Game Experience
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { id: 'spin', title: 'Spin the Wheel', icon: '🎡', desc: 'Classic lucky wheel' },
+                                            { id: 'scratch', title: 'Scratch Card', icon: '🎟️', desc: 'Instant scratch-off' },
+                                            { id: 'slot', title: 'Slot Machine', icon: '🎰', desc: '3-reel casino reels' },
+                                            { id: 'box', title: 'Mystery Box', icon: '🎁', desc: 'Tap to unbox gift' },
+                                        ].map(game => (
+                                            <div
+                                                key={game.id}
+                                                onClick={() => setNewCampaign({ ...newCampaign, campaign_type: game.id })}
+                                                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                                                    newCampaign.campaign_type === game.id
+                                                        ? 'border-amber-500 bg-amber-50/50 shadow-sm ring-2 ring-amber-500/20'
+                                                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                                                }`}
+                                            >
+                                                <div className="text-2xl mb-1">{game.icon}</div>
+                                                <div className="font-extrabold text-xs text-slate-900 font-brand-outfit">{game.title}</div>
+                                                <div className="text-[11px] text-slate-400">{game.desc}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Date Controls */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Start Date & Time
+                                        </label>
+                                        <input
+                                            type="datetime-local"
+                                            required
+                                            value={newCampaign.start_date}
+                                            onChange={e => setNewCampaign({ ...newCampaign, start_date: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            End Date & Time
+                                        </label>
+                                        <input
+                                            type="datetime-local"
+                                            required
+                                            value={newCampaign.end_date}
+                                            onChange={e => setNewCampaign({ ...newCampaign, end_date: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Play Limits */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Max Claims (0 for unlimited)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={newCampaign.max_claims}
+                                            onChange={e => setNewCampaign({ ...newCampaign, max_claims: parseInt(e.target.value) || 0 })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Max Plays Per IP
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={newCampaign.max_spins_per_ip ?? 50}
+                                            onChange={e => setNewCampaign({ ...newCampaign, max_spins_per_ip: parseInt(e.target.value) || 50 })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* In-Store Mode Switch */}
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={newCampaign.is_in_store}
+                                            onChange={e => setNewCampaign({ ...newCampaign, is_in_store: e.target.checked })}
+                                            className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                                        />
+                                        <div>
+                                            <span className="font-bold text-xs sm:text-sm text-slate-800 font-brand-outfit">
+                                                Enable In-Store Checkout Mode
+                                            </span>
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                Recommended for retail counters. Allows different shoppers on the store's Wi-Fi / devices to register independently.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {/* Social Unlock Toggle */}
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={newCampaign.show_social_page}
+                                            onChange={e => setNewCampaign({ ...newCampaign, show_social_page: e.target.checked })}
+                                            className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                                        />
+                                        <div>
+                                            <span className="font-bold text-xs sm:text-sm text-slate-800 font-brand-outfit">
+                                                Require Social Media Follow to Unlock
+                                            </span>
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                Customers must follow your Instagram or Facebook page before spinning.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {newCampaign.show_social_page && (
+                                    <div className="space-y-4 pl-4 border-l-2 border-amber-500">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                                Instagram Profile URL
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={newCampaign.instagram_link}
+                                                onChange={e => setNewCampaign({ ...newCampaign, instagram_link: e.target.value })}
+                                                placeholder="https://instagram.com/yourstore"
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                                Facebook Page URL
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={newCampaign.facebook_link}
+                                                onChange={e => setNewCampaign({ ...newCampaign, facebook_link: e.target.value })}
+                                                placeholder="https://facebook.com/yourstore"
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </form>
+                        </div>
+
+                        <div className="p-4 sm:p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                            <button
+                                type="button"
+                                onClick={() => setIsCreateModalOpen(false)}
+                                className="px-5 py-2.5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs font-brand-outfit transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                form="createCampaignForm"
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Creating...' : 'Create Campaign'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* EDIT CAMPAIGN MODAL */}
+            {editModalOpen && editingCampaign && (
+                <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 font-brand-sans">
+                    <div className="bg-white rounded-[36px] max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-100">
+                            <div>
+                                <h2 className="text-xl font-black font-brand-outfit text-slate-900">
+                                    Edit Campaign
+                                </h2>
+                                <p className="text-xs text-slate-400 mt-0.5">
+                                    Update dates, limits, and settings.
+                                </p>
+                            </div>
                             <button
                                 onClick={() => {
-                                    setEditingCampaign({
-                                        ...campaign,
-                                        start_date: convertUTCToLocal(campaign.start_date),
-                                        end_date: convertUTCToLocal(campaign.end_date)
-                                    });
-                                    setEditModalOpen(true);
+                                    setEditModalOpen(false);
+                                    setEditingCampaign(null);
                                 }}
-                                className="bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
+                                className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center"
                             >
-                                Edit
+                                <X className="w-4 h-4" />
                             </button>
-                            <button
-                                onClick={() => handleManagePrizes(campaign)}
-                                className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors"
-                            >
-                                🎁 Manage Prizes
-                            </button>
-                            <button
-                                onClick={() => setSelectedCampaignForDesign(campaign)}
-                                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-colors shadow-xs flex items-center gap-1"
-                            >
-                                <Palette size={14} /> Design & Branding
-                            </button>
-                            <button
-                                onClick={() => setSelectedCampaignForQR(campaign)}
-                                className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-emerald-700 transition-colors shadow-xs flex items-center gap-1"
-                            >
-                                🚀 Integrate & QR
-                            </button>
-                            <button
-                                onClick={() => handleDeleteCampaign(campaign.id)}
-                                className="text-red-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                                title="Delete Campaign"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        </>
-                    )}
-                </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-                <p><strong>Start:</strong> {new Date(campaign.start_date).toLocaleDateString()}</p>
-                <p><strong>End:</strong> {new Date(campaign.end_date).toLocaleDateString()}</p>
-                <p><strong>Max Claims:</strong> {campaign.max_claims || 'Unlimited'}</p>
-                <p><strong>Max Plays / IP:</strong> <span className="font-semibold text-gray-700">{campaign.max_spins_per_ip ?? 50}</span></p>
-                {campaign.design_settings?.theme_style && (
-                    <p><strong>Theme:</strong> <span className="capitalize font-medium text-gray-700">{campaign.design_settings.theme_style}</span></p>
-                )}
-            </div>
-        </div>
-        );
-    })}
-</div>
+                        </div>
 
+                        <div className="p-6 overflow-y-auto flex-1 space-y-5">
+                            <form id="editCampaignForm" onSubmit={handleEditCampaign} className="space-y-5">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                        Campaign Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={editingCampaign.name}
+                                        onChange={e => setEditingCampaign({ ...editingCampaign, name: e.target.value })}
+                                        className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                    />
+                                </div>
+
+                                {/* VISUAL GAME SELECTOR CARDS */}
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                                        Game Format
+                                    </label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {[
+                                            { id: 'spin', title: 'Spin the Wheel', icon: '🎡' },
+                                            { id: 'scratch', title: 'Scratch Card', icon: '🎟️' },
+                                            { id: 'slot', title: 'Slot Machine', icon: '🎰' },
+                                            { id: 'box', title: 'Mystery Box', icon: '🎁' },
+                                        ].map(game => (
+                                            <div
+                                                key={game.id}
+                                                onClick={() => setEditingCampaign({ ...editingCampaign, campaign_type: game.id })}
+                                                className={`p-3.5 rounded-2xl border cursor-pointer transition-all ${
+                                                    editingCampaign.campaign_type === game.id
+                                                        ? 'border-amber-500 bg-amber-50/50 shadow-sm ring-2 ring-amber-500/20'
+                                                        : 'border-slate-200 hover:border-slate-300 bg-white'
+                                                }`}
+                                            >
+                                                <div className="text-2xl mb-1">{game.icon}</div>
+                                                <div className="font-extrabold text-xs text-slate-900 font-brand-outfit">{game.title}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Start Date
+                                        </label>
+                                        <input
+                                            type="datetime-local"
+                                            required
+                                            value={editingCampaign.start_date}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, start_date: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            End Date
+                                        </label>
+                                        <input
+                                            type="datetime-local"
+                                            required
+                                            value={editingCampaign.end_date}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, end_date: e.target.value })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Max Claims
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={editingCampaign.max_claims}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, max_claims: parseInt(e.target.value) || 0 })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                                            Max Plays Per IP
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            value={editingCampaign.max_spins_per_ip ?? 50}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, max_spins_per_ip: parseInt(e.target.value) || 50 })}
+                                            className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={editingCampaign.is_in_store || false}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, is_in_store: e.target.checked })}
+                                            className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                                        />
+                                        <div>
+                                            <span className="font-bold text-xs sm:text-sm text-slate-800 font-brand-outfit">
+                                                In-Store Checkout Mode
+                                            </span>
+                                            <p className="text-xs text-slate-500 mt-0.5">
+                                                Allows multiple store visitors to play on common store devices.
+                                            </p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                    <label className="flex items-start gap-3 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            checked={editingCampaign.show_social_page || false}
+                                            onChange={e => setEditingCampaign({ ...editingCampaign, show_social_page: e.target.checked })}
+                                            className="mt-1 w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-slate-300"
+                                        />
+                                        <div>
+                                            <span className="font-bold text-xs sm:text-sm text-slate-800 font-brand-outfit">
+                                                Require Social Media Follow
+                                            </span>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                {editingCampaign.show_social_page && (
+                                    <div className="space-y-4 pl-4 border-l-2 border-amber-500">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                                Instagram Link
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={editingCampaign.instagram_link || ''}
+                                                onChange={e => setEditingCampaign({ ...editingCampaign, instagram_link: e.target.value })}
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                                                Facebook Link
+                                            </label>
+                                            <input
+                                                type="url"
+                                                value={editingCampaign.facebook_link || ''}
+                                                onChange={e => setEditingCampaign({ ...editingCampaign, facebook_link: e.target.value })}
+                                                className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </form>
+                        </div>
+
+                        <div className="p-4 sm:p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setEditModalOpen(false);
+                                    setEditingCampaign(null);
+                                }}
+                                className="px-5 py-2.5 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs font-brand-outfit transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                form="editCampaignForm"
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="px-6 py-2.5 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs font-brand-outfit transition-colors shadow-md disabled:opacity-50"
+                            >
+                                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Prized Management Modal */}
+            {selectedCampaign && (
+                <PrizeModal 
+                    campaign={selectedCampaign} 
+                    onClose={() => setSelectedCampaign(null)}
+                />
+            )}
+
+            {/* In-Store Standee & QR Integration Modal */}
             {selectedCampaignForQR && (
                 <CampaignIntegrationModal
                     campaign={selectedCampaignForQR}
@@ -405,6 +890,7 @@ const CampaignsPage = () => {
                 />
             )}
 
+            {/* Brand Design Studio Modal */}
             {selectedCampaignForDesign && (
                 <CampaignDesignModal
                     campaign={selectedCampaignForDesign}
@@ -415,376 +901,6 @@ const CampaignsPage = () => {
                     }}
                 />
             )}
-
-            {/* Create Modal */}
-            {isCreateModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
-                    <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
-                       <div className="flex justify-between items-center p-4 sm:p-6 border-b">
-                        <h2 className="text-lg sm:text-xl font-bold">Create New Campaign</h2>
-                        <button
-                            onClick={() => setIsCreateModalOpen(false)}
-                            className="text-gray-500 hover:text-gray-700 text-2xl font-bold leading-none"
-                            aria-label="Close modal"
-                        >
-                            ×
-                        </button>
-                        </div>
-
-                        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-                            <form onSubmit={handleCreateCampaign}>
-                                <div className="mb-4">
-                                    <label className="block mb-2">Name</label>
-                                    <input
-                                        type="text"
-                                        value={newCampaign.name}
-                                        onChange={e => setNewCampaign({...newCampaign, name: e.target.value})}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-2 font-medium">Game Type</label>
-                                    <select
-                                        value={newCampaign.campaign_type}
-                                        onChange={e => setNewCampaign({...newCampaign, campaign_type: e.target.value})}
-                                        className="w-full p-2.5 border rounded-lg font-medium text-gray-800"
-                                    >
-                                        <option value="spin">🎡 Spin and Win (Lucky Wheel)</option>
-                                        <option value="scratch">🎟️ Scratch Card (Instant Scratch Off)</option>
-                                        <option value="slot">🎰 Slot Machine (3-Reel Jackpot)</option>
-                                        <option value="box">🎁 Mystery Gift Box (Tap to Unbox)</option>
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-2">Start Date</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={newCampaign.start_date}
-                                        onChange={e => setNewCampaign({...newCampaign, start_date: e.target.value})}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-2">End Date</label>
-                                    <input
-                                        type="datetime-local"
-                                        value={newCampaign.end_date}
-                                        onChange={e => setNewCampaign({...newCampaign, end_date: e.target.value})}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={newCampaign.is_in_store}
-                                            onChange={e => setNewCampaign({...newCampaign, is_in_store: e.target.checked})}
-                                            className="mr-2"
-                                        />
-                                        <div>
-                                            <span className="font-medium">In-store Campaign</span>
-                                            <p className="text-sm text-gray-500">Enable this if the campaign will be used at point of sale for different customers</p>
-                                        </div>
-                                    </label>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-2">Max Claims</label>
-                                    <input
-                                        type="number"
-                                        value={newCampaign.max_claims}
-                                        onChange={e => setNewCampaign({...newCampaign, max_claims: parseInt(e.target.value) || 0})}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                </div>
-                                <div className="mb-4">
-                                    <label className="block mb-1 font-medium text-sm text-gray-700">Max Plays per IP Address</label>
-                                    <input
-                                        type="number"
-                                        value={newCampaign.max_spins_per_ip ?? 50}
-                                        onChange={e => setNewCampaign({...newCampaign, max_spins_per_ip: parseInt(e.target.value) || 0})}
-                                        className="w-full p-2 border rounded"
-                                        min="1"
-                                        max="10000"
-                                    />
-                                    <p className="text-xs text-gray-500 mt-1">Limits total plays from the same IP address to prevent abuse (Default: 50)</p>
-                                </div>
-                                <div className="mb-4">
-                                    <label className="flex items-center">
-                                        <input
-                                            type="checkbox"
-                                            checked={newCampaign.show_social_page}
-                                            onChange={e => setNewCampaign({...newCampaign, show_social_page: e.target.checked})}
-                                            className="mr-2"
-                                        />
-                                        Show social media follow page before game
-                                    </label>
-                                </div>
-
-                                {newCampaign.show_social_page && (
-                                    <>
-                                        <div className="mb-4">
-                                            <label className="block mb-2">Instagram Link</label>
-                                            <input
-                                                type="url"
-                                                value={newCampaign.instagram_link}
-                                                onChange={e => setNewCampaign({...newCampaign, instagram_link: e.target.value})}
-                                                className="w-full p-2 border rounded"
-                                                placeholder="https://instagram.com/yourpage"
-                                            />
-                                            <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
-                                        </div>
-
-                                        <div className="mb-4">
-                                            <label className="block mb-2">Facebook Link</label>
-                                            <input
-                                                type="url"
-                                                value={newCampaign.facebook_link}
-                                                onChange={e => setNewCampaign({...newCampaign, facebook_link: e.target.value})}
-                                                className="w-full p-2 border rounded"
-                                                placeholder="https://facebook.com/yourpage"
-                                            />
-                                            <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
-                                        </div>
-
-                                        <div className="mb-4">
-                                            <label className="block mb-2">Guidelines</label>
-                                            <textarea
-                                                value={newCampaign.guidelines}
-                                                onChange={e => setNewCampaign({...newCampaign, guidelines: e.target.value})}
-                                                className="w-full p-2 border rounded"
-                                                rows="4"
-                                                placeholder="Enter each guideline on a new line"
-                                            />
-                                        </div>
-
-                                    </>
-                                )}
-                                <div className="flex justify-end gap-2">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsCreateModalOpen(false)}
-                                        className="px-4 py-2 border rounded"
-                                        disabled={isSubmitting}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-blue-300 disabled:cursor-not-allowed"
-                                        disabled={isSubmitting}
-                                    >
-                                        {isSubmitting ? 'Creating...' : 'Create'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Prize Modal */}
-            {selectedCampaign && (
-                <PrizeModal 
-                    campaign={selectedCampaign} 
-                    onClose={() => setSelectedCampaign(null)}
-                />
-            )}
-
-
-            {editModalOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center px-4">
-                    <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] flex flex-col">
-                        <div className="p-4 sm:p-6 border-b">
-                            <h2 className="text-lg sm:text-xl font-bold">Edit Campaign</h2>
-                        </div>
-
-                        <div className="p-4 sm:p-6 overflow-y-auto flex-1">
-                            <form onSubmit={handleEditCampaign}>
-                                <div className="space-y-4">
-                                    <div>
-                                        <label className="block mb-2">Name</label>
-                                        <input
-                                            type="text"
-                                            value={editingCampaign.name}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                name: e.target.value
-                                            })}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block mb-2 font-medium">Game Type</label>
-                                        <select
-                                            value={editingCampaign.campaign_type}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                campaign_type: e.target.value
-                                            })}
-                                            className="w-full p-2.5 border rounded-lg font-medium text-gray-800"
-                                        >
-                                            <option value="spin">🎡 Spin and Win (Lucky Wheel)</option>
-                                            <option value="scratch">🎟️ Scratch Card (Instant Scratch Off)</option>
-                                            <option value="slot">🎰 Slot Machine (3-Reel Jackpot)</option>
-                                            <option value="box">🎁 Mystery Gift Box (Tap to Unbox)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label className="block mb-2">Start Date</label>
-                                        <input
-                                            type="datetime-local"
-                                            value={editingCampaign.start_date}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                start_date: e.target.value
-                                            })}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block mb-2">End Date</label>
-                                        <input
-                                            type="datetime-local"
-                                            value={editingCampaign.end_date}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                end_date: e.target.value
-                                            })}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block mb-2">Max Claims</label>
-                                        <input
-                                            type="number"
-                                            value={editingCampaign.max_claims}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                max_claims: parseInt(e.target.value) || 0
-                                            })}
-                                            className="w-full p-2 border rounded"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block mb-1 font-medium text-sm text-gray-700">Max Plays per IP Address</label>
-                                        <input
-                                            type="number"
-                                            value={editingCampaign.max_spins_per_ip ?? 50}
-                                            onChange={e => setEditingCampaign({
-                                                ...editingCampaign,
-                                                max_spins_per_ip: parseInt(e.target.value) || 0
-                                            })}
-                                            className="w-full p-2 border rounded"
-                                            min="1"
-                                            max="10000"
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">Limits total plays from the same IP address to prevent abuse (Default: 50)</p>
-                                    </div>
-                                    <div>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={editingCampaign.is_in_store || false}
-                                                onChange={e => setEditingCampaign({
-                                                    ...editingCampaign,
-                                                    is_in_store: e.target.checked
-                                                })}
-                                                className="mr-2"
-                                            />
-                                            <div>
-                                                <span className="font-medium">In-store Campaign</span>
-                                                <p className="text-sm text-gray-500">Enable this if the campaign will be used at point of sale for different customers</p>
-                                            </div>
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <label className="flex items-center">
-                                            <input
-                                                type="checkbox"
-                                                checked={editingCampaign.show_social_page || false}
-                                                onChange={e => setEditingCampaign({
-                                                    ...editingCampaign,
-                                                    show_social_page: e.target.checked
-                                                })}
-                                                className="mr-2"
-                                            />
-                                            Show social media follow page before game
-                                        </label>
-                                    </div>
-                                    {editingCampaign.show_social_page && (
-                                        <>
-                                            <div>
-                                                <label className="block mb-2">Instagram Link</label>
-                                                <input
-                                                    type="url"
-                                                    value={editingCampaign.instagram_link || ''}
-                                                    onChange={e => setEditingCampaign({
-                                                        ...editingCampaign,
-                                                        instagram_link: e.target.value
-                                                    })}
-                                                    className="w-full p-2 border rounded"
-                                                    placeholder="https://instagram.com/yourpage"
-                                                />
-                                                <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
-                                            </div>
-                                            <div>
-                                                <label className="block mb-2">Facebook Link</label>
-                                                <input
-                                                    type="url"
-                                                    value={editingCampaign.facebook_link || ''}
-                                                    onChange={e => setEditingCampaign({
-                                                        ...editingCampaign,
-                                                        facebook_link: e.target.value
-                                                    })}
-                                                    className="w-full p-2 border rounded"
-                                                    placeholder="https://facebook.com/yourpage"
-                                                />
-                                                <p className="text-xs text-gray-500 mt-1">Include https:// at the beginning</p>
-                                            </div>
-                                            <div>
-                                                <label className="block mb-2">Guidelines</label>
-                                                <textarea
-                                                    value={editingCampaign.guidelines || ''}
-                                                    onChange={e => setEditingCampaign({
-                                                        ...editingCampaign,
-                                                        guidelines: e.target.value
-                                                    })}
-                                                    className="w-full p-2 border rounded"
-                                                    rows="4"
-                                                    placeholder="Enter each guideline on a new line"
-                                                />
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </form>
-                        </div>
-
-                        <div className="p-4 sm:p-6 border-t bg-gray-50">
-                            <div className="flex justify-end gap-2">
-                                <button
-                                    onClick={() => {
-                                        setEditModalOpen(false);
-                                        setEditingCampaign(null);
-                                    }}
-                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-800"
-                                    disabled={isSubmitting}
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleEditCampaign}
-                                    className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? 'Saving...' : 'Save Changes'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-            
         </div>
     );
 };

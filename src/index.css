@@ -70,23 +70,55 @@
     radial-gradient(at 80% 80%, rgba(245, 158, 11, 0.18) 0px, transparent 50%);
 }
 
-.bg-mesh-light {
-  background-color: #ffffff;
-  background-image: 
-    radial-gradient(at 10% 15%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, rgba(244, 63, 94, 0.06) 0px, transparent 50%),
-    radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+/* Floating tilt animations for 3D badges */
+@keyframes float-tilt-1 {
+  0%, 100% {
+    transform: translateY(0px) rotate(-8deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-5deg);
+  }
 }
 
-.bg-conic-spin {
-  background: conic-gradient(
-    #4F46E5 0deg 45deg,
-    #E11D48 45deg 90deg,
-    #059669 90deg 135deg,
-    #D97706 135deg 180deg,
-    #7C3AED 180deg 225deg,
-    #0891B2 225deg 270deg,
-    #EA580C 270deg 315deg,
-    #475569 315deg 360deg
-  );
+@keyframes float-tilt-2 {
+  0%, 100% {
+    transform: translateY(0px) rotate(10deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(14deg);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-float-tilt-left {
+  animation: float-tilt-1 5s ease-in-out infinite;
+}
+
+.animate-float-tilt-right {
+  animation: float-tilt-2 6s ease-in-out infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+/* 3D Sticker shadows & Super-Card styling */
+.shadow-sticker {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-supercard {
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.07), 0 0 1px 1px rgba(15, 23, 42, 0.03);
+}
+
+.shadow-supercard-hover:hover {
+  box-shadow: 0 28px 50px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
 }

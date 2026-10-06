@@ -1,337 +1,338 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { AlertCircle, Phone, Settings, Menu, X } from 'lucide-react';
+import { 
+    AlertCircle, 
+    Phone, 
+    Settings, 
+    Menu, 
+    X, 
+    Sparkles, 
+    LayoutDashboard, 
+    Layers, 
+    LogOut, 
+    Clock, 
+    CheckCircle2
+} from 'lucide-react';
+import Logo from './Logo';
 
 const RenewalModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null;
+    if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 max-w-md w-full mx-4">
-        <div className="flex items-center justify-center mb-4">
-          <div className="bg-indigo-100 rounded-full p-3">
-            <Phone className="w-6 h-6 text-indigo-600" />
-          </div>
+    return (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-[32px] p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-100 text-center relative font-brand-sans">
+                <button
+                    onClick={onClose}
+                    className="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center"
+                >
+                    <X className="w-4 h-4" />
+                </button>
+
+                <div className="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-4 border border-amber-100">
+                    <Phone className="w-7 h-7" />
+                </div>
+
+                <h3 className="text-xl sm:text-2xl font-black font-brand-outfit text-slate-900 mb-2">
+                    Renew Your Subscription
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-500 mb-6 leading-relaxed">
+                    Contact your dedicated account executive to extend your access and keep your in-store rewards running.
+                </p>
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 mb-6">
+                    <p className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">
+                        Executive Hotline
+                    </p>
+                    <a
+                        href="tel:7034714831"
+                        className="text-2xl font-black font-brand-outfit text-amber-600 hover:text-amber-700 block transition-colors"
+                    >
+                        7034714831
+                    </a>
+                    <span className="text-[11px] text-slate-400 mt-1 block">
+                        Mon – Sat, 9:00 AM – 6:00 PM
+                    </span>
+                </div>
+
+                <div className="flex gap-3">
+                    <a
+                        href="tel:7034714831"
+                        className="flex-1 py-3 px-4 rounded-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-sm font-brand-outfit transition-colors shadow-md text-center flex items-center justify-center gap-1.5"
+                    >
+                        <Phone className="w-4 h-4" /> Call Now
+                    </a>
+                    <button
+                        onClick={onClose}
+                        className="flex-1 py-3 px-4 rounded-full bg-slate-100 text-slate-700 font-bold text-sm font-brand-outfit hover:bg-slate-200 transition-colors text-center"
+                    >
+                        Close
+                    </button>
+                </div>
+            </div>
         </div>
-        <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
-          Renew Your Subscription
-        </h3>
-        <p className="text-gray-600 text-center mb-6">
-          Contact our customer care executive to renew or extend your subscription
-        </p>
-        <div className="bg-gray-50 rounded-lg p-4 mb-6">
-          <p className="text-sm text-gray-600 text-center mb-2">Customer Care Number</p>
-          <a
-            href="tel:7034714831"
-            className="text-2xl font-bold text-indigo-600 hover:text-indigo-700 text-center block"
-          >
-            7034714831
-          </a>
-        </div>
-        <button
-          onClick={onClose}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          Close
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 const ExpiredAccessOverlay = ({ accessStatus, onRenewClick, onLogout }) => {
-  const isTrial = accessStatus?.status === 'trial_expired';
-  const isExpired = accessStatus?.status === 'expired';
+    const isTrial = accessStatus?.status === 'trial_expired';
+    const isExpired = accessStatus?.status === 'expired';
 
-  if (!isTrial && !isExpired) return null;
+    if (!isTrial && !isExpired) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-2xl p-8 max-w-lg w-full mx-4">
-        <div className="flex items-center justify-center mb-6">
-          <div className="bg-red-100 rounded-full p-4">
-            <AlertCircle className="w-12 h-12 text-red-600" />
-          </div>
+    return (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-brand-sans">
+            <div className="bg-white rounded-[36px] p-8 max-w-lg w-full shadow-2xl border border-slate-100 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-5 border border-rose-100">
+                    <AlertCircle className="w-8 h-8" />
+                </div>
+
+                <h2 className="text-2xl sm:text-3xl font-black font-brand-outfit text-slate-900 mb-2">
+                    {isTrial ? 'Trial Period Ended' : 'Subscription Expired'}
+                </h2>
+
+                <p className="text-slate-500 text-sm mb-6 leading-relaxed">
+                    {isTrial
+                        ? 'Your 7-day merchant trial has concluded. Activate your active subscription to resume customer games, claims, and analytics.'
+                        : 'Your subscription has expired. Please renew to keep your customer QR codes active and maintain live game access.'
+                    }
+                </p>
+
+                <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 mb-6">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">
+                        Executive Hotline
+                    </p>
+                    <a
+                        href="tel:7034714831"
+                        className="text-3xl font-black font-brand-outfit text-amber-600 hover:text-amber-700 block mb-1"
+                    >
+                        7034714831
+                    </a>
+                    <p className="text-xs text-slate-400">
+                        Available Mon–Sat, 9 AM – 6 PM
+                    </p>
+                </div>
+
+                <div className="flex gap-3">
+                    <button
+                        onClick={onRenewClick}
+                        className="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 py-3.5 px-4 rounded-full transition-colors font-extrabold text-sm font-brand-outfit shadow-md flex items-center justify-center gap-2"
+                    >
+                        <Phone className="w-4 h-4" />
+                        Call to Renew
+                    </button>
+                    <button
+                        onClick={onLogout}
+                        className="flex-1 bg-slate-100 text-slate-700 py-3.5 px-4 rounded-full hover:bg-slate-200 transition-colors font-bold text-sm font-brand-outfit"
+                    >
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
-
-        <h2 className="text-2xl font-bold text-center text-gray-900 mb-3">
-          {isTrial ? 'Trial Period Ended' : 'Subscription Expired'}
-        </h2>
-
-        <p className="text-gray-600 text-center mb-6">
-          {isTrial
-            ? 'Your 7-day trial period has ended. Please contact our customer care to activate your subscription and continue using CofferCard.'
-            : 'Your subscription has expired. Please renew to continue accessing your campaigns and features.'
-          }
-        </p>
-
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-6">
-          <p className="text-sm text-gray-600 text-center mb-3 font-medium">
-            Contact Customer Care to Renew
-          </p>
-          <a
-            href="tel:7034714831"
-            className="text-3xl font-bold text-indigo-600 hover:text-indigo-700 text-center block mb-2"
-          >
-            7034714831
-          </a>
-          <p className="text-xs text-gray-500 text-center">
-            Available Mon-Sat, 9 AM - 6 PM
-          </p>
-        </div>
-
-        <div className="flex space-x-3">
-          <button
-            onClick={onRenewClick}
-            className="flex-1 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-          >
-            <Phone className="w-4 h-4 inline mr-2" />
-            Call to Renew
-          </button>
-          <button
-            onClick={onLogout}
-            className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-          >
-            Logout
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
-const Layout = ({ children }) => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [isRenewalModalOpen, setIsRenewalModalOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const Layout = () => {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [isRenewalModalOpen, setIsRenewalModalOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
+    };
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+    const isActive = (path) => {
+        return location.pathname === path;
+    };
 
-  // Check if access is expired
-  const isAccessExpired = () => {
-    if (!user?.access_status) return false;
-    return user.access_status.status === 'trial_expired' || user.access_status.status === 'expired';
-  };
+    const shouldShowRenewalWarning = () => {
+        if (!user?.access_status) return false;
+        const daysLeft = user.access_status.days_left;
+        return daysLeft !== null && daysLeft !== undefined && daysLeft < 10 && daysLeft >= 0;
+    };
 
-  // Check if we should show the renewal warning (days < 10)
-  const shouldShowRenewalWarning = () => {
-    if (!user?.access_status) return false;
-    const daysLeft = user.access_status.days_left;
-    return daysLeft !== null && daysLeft !== undefined && daysLeft < 10 && daysLeft >= 0;
-  };
+    const getDaysLeftDisplay = () => {
+        const daysLeft = user?.access_status?.days_left;
+        if (daysLeft === 0) return 'Expires today';
+        if (daysLeft === 1) return '1 day left';
+        return `${daysLeft} days left`;
+    };
 
-  const getDaysLeftDisplay = () => {
-    const daysLeft = user?.access_status?.days_left;
-    if (daysLeft === 0) return 'Expires today';
-    if (daysLeft === 1) return '1 day left';
-    return `${daysLeft} days left`;
-  };
+    return (
+        <div className="min-h-screen bg-[#F8FAFC] font-brand-sans text-slate-900 flex flex-col selection:bg-amber-200 selection:text-amber-900">
+            {/* Top Navigation Bar */}
+            <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-xs">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex items-center justify-between h-16 sm:h-20">
+                        {/* Left Side: Logo & Main Navigation Pills */}
+                        <div className="flex items-center gap-6 sm:gap-8">
+                            <Link to="/dashboard">
+                                <Logo size="md" />
+                            </Link>
 
-  const handleRenewCall = () => {
-    window.location.href = 'tel:7034714831';
-  };
+                            {/* Desktop Navigation Links */}
+                            <nav className="hidden md:flex items-center gap-1.5 bg-slate-100/80 p-1.5 rounded-full border border-slate-200/50">
+                                <Link
+                                    to="/dashboard"
+                                    className={`px-4 py-1.5 rounded-full text-xs font-bold font-brand-outfit transition-all flex items-center gap-1.5 ${
+                                        isActive('/dashboard')
+                                            ? 'bg-white text-slate-900 shadow-xs font-black'
+                                            : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                                >
+                                    <LayoutDashboard className="w-3.5 h-3.5 text-amber-500" />
+                                    Dashboard
+                                </Link>
+                                <Link
+                                    to="/campaigns"
+                                    className={`px-4 py-1.5 rounded-full text-xs font-bold font-brand-outfit transition-all flex items-center gap-1.5 ${
+                                        isActive('/campaigns')
+                                            ? 'bg-white text-slate-900 shadow-xs font-black'
+                                            : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                                >
+                                    <Layers className="w-3.5 h-3.5 text-amber-500" />
+                                    Campaigns
+                                </Link>
+                                <Link
+                                    to="/settings"
+                                    className={`px-4 py-1.5 rounded-full text-xs font-bold font-brand-outfit transition-all flex items-center gap-1.5 ${
+                                        isActive('/settings')
+                                            ? 'bg-white text-slate-900 shadow-xs font-black'
+                                            : 'text-slate-600 hover:text-slate-900'
+                                    }`}
+                                >
+                                    <Settings className="w-3.5 h-3.5 text-amber-500" />
+                                    Settings
+                                </Link>
+                            </nav>
+                        </div>
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <Link to="/dashboard" className="flex-shrink-0 text-xl font-bold text-indigo-600">
-                CofferCard
-              </Link>
+                        {/* Right Side: Status Badge, Store Chip & Logout */}
+                        <div className="hidden md:flex items-center gap-4">
+                            {/* Renewal Warning Pill */}
+                            {shouldShowRenewalWarning() && (
+                                <button
+                                    onClick={() => setIsRenewalModalOpen(true)}
+                                    className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 px-3.5 py-1.5 rounded-full hover:bg-amber-100 transition-colors text-xs font-bold"
+                                >
+                                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                    <span>{getDaysLeftDisplay()}</span>
+                                    <span className="bg-amber-600 text-white px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                        Renew
+                                    </span>
+                                </button>
+                            )}
 
-              {/* Desktop Navigation */}
-              <div className="hidden md:ml-6 md:flex md:space-x-8">
-                <Link
-                  to="/dashboard"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive('/dashboard')
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/campaigns"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive('/campaigns')
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  Campaigns
-                </Link>
-                <Link
-                  to="/settings"
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isActive('/settings')
-                      ? 'border-indigo-500 text-gray-900'
-                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                  }`}
-                >
-                  <Settings className="w-4 h-4 mr-1" />
-                  Settings
-                </Link>
-              </div>
-            </div>
+                            {/* Store Profile Badge */}
+                            <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 px-3 py-1.5 rounded-full">
+                                <div className="w-6 h-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-black uppercase font-brand-outfit">
+                                    {user?.company_name ? user.company_name.charAt(0) : 'S'}
+                                </div>
+                                <span className="text-xs font-bold text-slate-800 max-w-[140px] truncate">
+                                    {user?.company_name || 'My Store'}
+                                </span>
+                            </div>
 
-            {/* Desktop Right Side */}
-            <div className="hidden md:flex items-center space-x-4">
-              {/* Renewal Warning */}
-              {shouldShowRenewalWarning() && (
-                <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                  <AlertCircle className="w-4 h-4 text-orange-600" />
-                  <span className="text-sm font-medium text-orange-700">
-                    {getDaysLeftDisplay()}
-                  </span>
-                  <button
-                    onClick={() => setIsRenewalModalOpen(true)}
-                    className="ml-2 px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 transition-colors"
-                  >
-                    Renew
-                  </button>
-                </div>
-              )}
+                            {/* Logout Pill */}
+                            <button
+                                onClick={handleLogout}
+                                className="w-9 h-9 rounded-full bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 flex items-center justify-center transition-colors"
+                                title="Sign out"
+                            >
+                                <LogOut className="w-4 h-4" />
+                            </button>
+                        </div>
 
-              {/* Company Name */}
-              <span className="text-sm text-gray-700 font-medium">{user?.company_name}</span>
-
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Logout
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <div className="flex md:hidden items-center">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="block h-6 w-6" />
-                ) : (
-                  <Menu className="block h-6 w-6" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-200">
-              <div className="pt-2 pb-3 space-y-1">
-                <Link
-                  to="/dashboard"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                    isActive('/dashboard')
-                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                  }`}
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/campaigns"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                    isActive('/campaigns')
-                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                  }`}
-                >
-                  Campaigns
-                </Link>
-                <Link
-                  to="/settings"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                    isActive('/settings')
-                      ? 'bg-indigo-50 border-indigo-500 text-indigo-700'
-                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
-                  }`}
-                >
-                  <Settings className="w-4 h-4 mr-2" />
-                  Settings
-                </Link>
-              </div>
-
-              {/* Mobile User Info & Actions */}
-              <div className="pt-4 pb-3 border-t border-gray-200">
-                <div className="flex items-center px-4 mb-3">
-                  <span className="text-sm text-gray-700 font-medium">{user?.company_name}</span>
-                </div>
-
-                {/* Renewal Warning on Mobile */}
-                {shouldShowRenewalWarning() && (
-                  <div className="px-4 mb-3">
-                    <div className="flex items-center space-x-2 bg-orange-50 border border-orange-200 rounded-lg px-3 py-2">
-                      <AlertCircle className="w-4 h-4 text-orange-600" />
-                      <span className="text-sm font-medium text-orange-700">
-                        {getDaysLeftDisplay()}
-                      </span>
-                      <button
-                        onClick={() => {
-                          setIsRenewalModalOpen(true);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className="ml-2 px-3 py-1 bg-orange-600 text-white text-xs font-medium rounded hover:bg-orange-700 transition-colors"
-                      >
-                        Renew
-                      </button>
+                        {/* Mobile Hamburger Button */}
+                        <div className="flex md:hidden items-center gap-2">
+                            {shouldShowRenewalWarning() && (
+                                <button
+                                    onClick={() => setIsRenewalModalOpen(true)}
+                                    className="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-full text-xs font-bold"
+                                >
+                                    {getDaysLeftDisplay()}
+                                </button>
+                            )}
+                            <button
+                                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                                className="p-2 rounded-xl text-slate-600 hover:bg-slate-100"
+                            >
+                                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                            </button>
+                        </div>
                     </div>
-                  </div>
-                )}
-
-                <div className="px-4">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50 rounded-md"
-                  >
-                    Logout
-                  </button>
                 </div>
-              </div>
-            </div>
-          )}
+
+                {/* Mobile Drawer */}
+                {isMobileMenuOpen && (
+                    <div className="md:hidden border-t border-slate-100 bg-white px-4 pt-3 pb-5 space-y-2">
+                        <Link
+                            to="/dashboard"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-bold font-brand-outfit ${
+                                isActive('/dashboard') ? 'bg-amber-50 text-amber-900 font-black' : 'text-slate-700'
+                            }`}
+                        >
+                            <LayoutDashboard className="w-4 h-4 text-amber-600" /> Dashboard
+                        </Link>
+                        <Link
+                            to="/campaigns"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-bold font-brand-outfit ${
+                                isActive('/campaigns') ? 'bg-amber-50 text-amber-900 font-black' : 'text-slate-700'
+                            }`}
+                        >
+                            <Layers className="w-4 h-4 text-amber-600" /> Campaigns
+                        </Link>
+                        <Link
+                            to="/settings"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl text-sm font-bold font-brand-outfit ${
+                                isActive('/settings') ? 'bg-amber-50 text-amber-900 font-black' : 'text-slate-700'
+                            }`}
+                        >
+                            <Settings className="w-4 h-4 text-amber-600" /> Settings
+                        </Link>
+
+                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs font-semibold text-slate-500">
+                                {user?.company_name}
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="text-xs font-bold text-rose-600 flex items-center gap-1"
+                            >
+                                <LogOut className="w-3.5 h-3.5" /> Sign out
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </header>
+
+            {/* Main Content Viewport */}
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+                <Outlet />
+            </main>
+
+            {/* Expired Access Guard Overlay */}
+            <ExpiredAccessOverlay
+                accessStatus={user?.access_status}
+                onRenewClick={() => setIsRenewalModalOpen(true)}
+                onLogout={handleLogout}
+            />
+
+            {/* Renewal Phone Modal */}
+            <RenewalModal
+                isOpen={isRenewalModalOpen}
+                onClose={() => setIsRenewalModalOpen(false)}
+            />
         </div>
-      </nav>
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <Outlet />
-      </main>
-
-      {/* Renewal Modal */}
-      <RenewalModal
-        isOpen={isRenewalModalOpen}
-        onClose={() => setIsRenewalModalOpen(false)}
-      />
-
-      {/* Expired Access Overlay - Blocks all interaction when expired */}
-      {isAccessExpired() && (
-        <ExpiredAccessOverlay
-          accessStatus={user?.access_status}
-          onRenewClick={handleRenewCall}
-          onLogout={handleLogout}
-        />
-      )}
-    </div>
-  );
+    );
 };
 
 export default Layout;
