@@ -123,19 +123,19 @@
   box-shadow: 0 28px 50px -15px rgba(15, 23, 42, 0.12), 0 0 1px 1px rgba(15, 23, 42, 0.04);
 }
 
-/* Soft Linear Gradient Buttons: White sheen ➔ Gentle Golden Honey */
+/* Soft Linear Gradient Buttons: Match user pill design (Gentle cream-gold ➔ Rich Warm Amber) */
 .btn-soft-amber {
-  background: linear-gradient(180deg, #FFFFFF 0%, #FEF3C7 35%, #FDE68A 75%, #F59E0B 100%);
+  background: linear-gradient(180deg, #FFFBEB 0%, #FEF08A 28%, #FBBF24 68%, #F59E0B 100%);
   color: #0F172A;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.22), inset 0 1px 0 0 rgba(255, 255, 255, 0.8);
+  border: 1.5px solid #F59E0B;
+  box-shadow: 0 4px 16px -2px rgba(245, 158, 11, 0.35), 0 2px 4px -1px rgba(217, 119, 6, 0.2), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .btn-soft-amber:hover {
-  background: linear-gradient(180deg, #FFFFFF 0%, #FDE68A 45%, #F59E0B 100%);
-  border-color: rgba(217, 119, 6, 0.5);
-  box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.32), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  background: linear-gradient(180deg, #FEF9C3 0%, #FDE047 30%, #F59E0B 75%, #D97706 100%);
+  border-color: #D97706;
+  box-shadow: 0 8px 24px -2px rgba(245, 158, 11, 0.45), 0 4px 6px -1px rgba(217, 119, 6, 0.25), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95);
   transform: translateY(-1px) scale(1.02);
 }
 

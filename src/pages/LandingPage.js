@@ -218,13 +218,14 @@ const LandingPage = () => {
                         <div className="mt-8 flex flex-wrap items-center gap-3.5">
                             <button
                                 onClick={() => navigate('/signup')}
-                                className="px-7 py-3.5 rounded-2xl btn-soft-amber font-extrabold text-sm sm:text-base font-brand-outfit flex items-center gap-2"
+                                className="px-8 py-3.5 rounded-full btn-soft-amber font-black text-sm sm:text-base font-brand-outfit flex items-center gap-2.5"
                             >
-                                Create Campaign <ArrowRight className="w-4 h-4 text-slate-900" />
+                                <span>Create Campaign</span>
+                                <ArrowRight className="w-4 h-4 stroke-[2.5] text-slate-900" />
                             </button>
                             <button
                                 onClick={handlePlayLiveGame}
-                                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base font-brand-outfit transition-all shadow-xs hover:border-slate-300 flex items-center gap-2"
+                                className="px-6 py-3.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-bold text-sm sm:text-base font-brand-outfit transition-all shadow-xs hover:border-slate-300 flex items-center gap-2"
                             >
                                 <Play className="w-4 h-4 fill-slate-800 text-slate-800" /> Play Live Demo ({activeDemo.name.split(' ')[0]})
                             </button>
